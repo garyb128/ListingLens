@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Text.Json;
 using eBaySoldItemAnalyser.Interfaces;
 using eBaySoldItemAnalyser.Models;
 using Microsoft.Extensions.Configuration;
@@ -21,7 +22,8 @@ public class SerpAPIClient : ISoldListingProvider
 
     public async Task<SearchResult> SearchSoldListingsAsync(
     string searchTerm,
-    string ebayDomain)
+    string ebayDomain,
+    string currency)
     {
         var url = "https://serpapi.com/search" +
             $"?engine=ebay" +
@@ -37,16 +39,29 @@ public class SerpAPIClient : ISoldListingProvider
 
         var json = await response.Content.ReadAsStringAsync();
 
+        var searchResponse = JsonSerializer.Deserialize<SearchResponse>(json);
+
+        var listings = searchResponse?.OrganicResults?
+            .Select(x => new SoldListing
+            {
+                Title = x.Title ?? "",
+                Price = x.Price?.Extracted ?? 0,
+                Currency = currency,
+                Condition = x.Condition ?? "",
+                SoldDate = DateTime.TryParse(x.SoldDate, out var date)
+                ? date
+                : DateTime.MinValue,
+                ImageUrl = x.Thumbnail ?? "",
+                ListingUrl = x.Link ?? ""
+            })
+            .ToList() ?? [];
+
+        Console.WriteLine(searchResponse?.OrganicResults?.Count);
+
         return new SearchResult
         {
             SearchTerm = searchTerm,
-            Listings =
-            [
-                new SoldListing
-                {
-                    Title = json
-                }
-            ]
+            Listings = listings
         };
     }
 }

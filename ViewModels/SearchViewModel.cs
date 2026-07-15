@@ -22,6 +22,7 @@ public partial class SearchViewModel : ObservableObject
     bool isSearching;
 
     public ObservableCollection<EbayMarketplace> MarketPlaces { get; }
+    public ObservableCollection<SoldListing> Listings { get; } = [];
 
     public SearchViewModel(
         ISoldListingProvider listingProvider,
@@ -33,7 +34,6 @@ public partial class SearchViewModel : ObservableObject
 
         MarketPlaces = new ObservableCollection<EbayMarketplace>(
             _marketplaceService.GetMarketplaces());
-
 
         selectedMarketplace = MarketPlaces.First();
     }
@@ -48,12 +48,14 @@ public partial class SearchViewModel : ObservableObject
 
         try
         {
-            var result = await _listingProvider.SearchSoldListingsAsync(searchTerm, SelectedMarketplace.Domain);
+            var result = await _listingProvider.SearchSoldListingsAsync(searchTerm, SelectedMarketplace.Domain,selectedMarketplace.Currency);
 
-            await Shell.Current.DisplayAlert(
-                 "API Test",
-                  result.Listings[0].Title,
-                  "OK");
+            Listings.Clear();
+
+            foreach (var listing in result.Listings)
+            {
+                Listings.Add(listing);
+            }
         }
         finally
         {

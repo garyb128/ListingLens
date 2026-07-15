@@ -1,19 +1,18 @@
-﻿namespace eBaySoldItemAnalyser
+﻿namespace eBaySoldItemAnalyser;
+
+public partial class App : Application
 {
-    public partial class App : Application
+    private readonly AppShell _appShell;
+
+    public App(AppShell appShell)
     {
-        private readonly AppShell _appShell;
+        InitializeComponent();
 
-        public App(AppShell appShell)
-        {
-            InitializeComponent();
+        _appShell = appShell;
+    }
 
-            _appShell = appShell;
-        }
-
-        protected override Window CreateWindow(IActivationState? activationState)
-        {
-            return new Window(_appShell);
-        }
+    protected override Window CreateWindow(IActivationState? activationState)
+    {
+        return new Window(_appShell);
     }
 }

@@ -11,31 +11,36 @@ public class MarketplaceService
             new EbayMarketplace
             {
                 Name = "United Kingdom",
-                Domain = "ebay.co.uk"
+                Domain = "ebay.co.uk",
+                Currency = "£"
             },
 
             new EbayMarketplace
             {
                 Name = "United States",
-                Domain = "ebay.com"
+                Domain = "ebay.com",
+                Currency = "$"
             },
 
             new EbayMarketplace
             {
                 Name = "Germany",
-                Domain = "ebay.de"
+                Domain = "ebay.de",
+                Currency = "€"
             },
 
             new EbayMarketplace
             {
                 Name = "France",
-                Domain = "ebay.fr"
+                Domain = "ebay.fr",
+                Currency = "€"
             },
 
             new EbayMarketplace
             {
                 Name = "Australia",
-                Domain = "ebay.com.au"
+                Domain = "ebay.com.au",
+                Currency = "$"
             }
         ];
     }

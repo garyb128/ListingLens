@@ -2,37 +2,104 @@
 <ContentPage 
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:viewModels="clr-namespace:eBaySoldItemAnalyser.ViewModels"
     x:Class="eBaySoldItemAnalyser.MainPage">
 
-    <VerticalStackLayout Padding="20" Spacing="15">
+    <Grid Padding="20" RowSpacing="15">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
 
         <Label 
+            Grid.Row="0"
             Text="eBay Sold Item Analyser"
             FontSize="24" />
 
 
         <Entry
+            Grid.Row="1"
             Placeholder="Search item..."
             Text="{Binding SearchTerm}" />
 
 
         <Picker
+            Grid.Row="2"
             Title="Select Marketplace"
             ItemsSource="{Binding MarketPlaces}"
-            SelectedItem="{Binding SelectedMarketlace}"
+            SelectedItem="{Binding SelectedMarketplace}"
             ItemDisplayBinding="{Binding Name}" />
 
 
-        <Button
-            Text="Search"
-            Command="{Binding SearchCommand}" />
+        <Grid Grid.Row="3" RowSpacing="10">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
 
-        <ActivityIndicator
-            IsRunning="{Binding IsSearching}"
-            IsVisible="{Binding IsSearching}" />
+            <Button
+                Grid.Row="0"
+                Text="Search"
+                Command="{Binding SearchCommand}" />
 
-    </VerticalStackLayout>
+
+            <CollectionView
+                Grid.Row="1"
+                ItemsSource="{Binding Listings}">
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+
+                        <Frame Padding="10">
+
+                            <HorizontalStackLayout Spacing="10">
+
+                                <Image
+                                    Source="{Binding ImageUrl}"
+                                    HeightRequest="120"
+                                    WidthRequest="120"
+                                    Aspect="AspectFit"/>
+
+
+                                <VerticalStackLayout>
+
+                                    <Label
+                                        Text="{Binding Title}"
+                                        FontSize="18"/>
+
+
+                                    <Label
+                                        Text="{Binding DisplayPrice}"
+                                        FontSize="14"/>
+
+
+                                    <Label
+                                        Text="{Binding Condition}"
+                                        FontSize="14"/>
+
+                                </VerticalStackLayout>
+
+                            </HorizontalStackLayout>
+
+                        </Frame>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+
+            <ActivityIndicator
+                IsRunning="{Binding IsSearching}"
+                IsVisible="{Binding IsSearching}" />
+
+        </Grid>
+
+    </Grid>
 
 </ContentPage>

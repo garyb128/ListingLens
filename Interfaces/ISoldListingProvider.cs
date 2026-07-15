@@ -6,5 +6,6 @@ public interface ISoldListingProvider
 {
     Task<SearchResult> SearchSoldListingsAsync(
         string searchTerm,
-        string ebayDomain);
+        string ebayDomain,
+        string currency);
 }
