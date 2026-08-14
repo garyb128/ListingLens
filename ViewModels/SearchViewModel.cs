@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using eBaySoldItemAnalyser.Interfaces;
 using eBaySoldItemAnalyser.Models;
@@ -20,6 +21,9 @@ public partial class SearchViewModel : ObservableObject
 
     [ObservableProperty]
     bool isSearching;
+
+    [ObservableProperty]
+    string errorMessage = string.Empty;
 
     public ObservableCollection<EbayMarketplace> MarketPlaces { get; }
     public ObservableCollection<SoldListing> Listings { get; } = [];
@@ -44,11 +48,24 @@ public partial class SearchViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(searchTerm) || selectedMarketplace == null)
             return;
 
-        isSearching = true;
+        IsSearching = true;
+        ErrorMessage = string.Empty;
 
         try
         {
-            var result = await _listingProvider.SearchSoldListingsAsync(searchTerm, SelectedMarketplace.Domain,selectedMarketplace.Currency);
+            var result = await _listingProvider.SearchSoldListingsAsync(
+                SearchTerm,
+                SelectedMarketplace.Domain,
+                SelectedMarketplace.Currency);
+
+            System.Diagnostics.Debug.WriteLine(
+                $"Listings returned: {result.Listings.Count}");
+
+            if (result.Listings.Count == 0)
+            {
+                ErrorMessage = "The search completed, but no sold listings were returned.";
+                return;
+            }
 
             Listings.Clear();
 
@@ -57,9 +74,28 @@ public partial class SearchViewModel : ObservableObject
                 Listings.Add(listing);
             }
         }
+        catch(TaskCanceledException)
+        {
+            ErrorMessage = "The search took too long. Please try again.";
+        }
+        catch (HttpRequestException ex)
+        {
+            if(ex.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+            {
+                ErrorMessage = "The sold listings service is currently unavailable. Please try again later.";
+            }
+            else
+            {
+                ErrorMessage = $"HTTP error: {ex.Message}";
+            }
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "Something went wrong while searching.";
+        }
         finally
         {
-            isSearching = false;
+            IsSearching = false;
         }
     }
 }

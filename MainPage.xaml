@@ -38,18 +38,23 @@
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-
 
             <Button
                 Grid.Row="0"
                 Text="Search"
                 Command="{Binding SearchCommand}" />
 
+            <Label
+                Grid.Row="1"
+                Text="{Binding ErrorMessage}"
+                TextColor="Red"
+                FontSize="14" />
 
             <CollectionView
-                Grid.Row="1"
+                Grid.Row="2"
                 ItemsSource="{Binding Listings}">
 
                 <CollectionView.ItemTemplate>
@@ -96,7 +101,8 @@
 
             <ActivityIndicator
                 IsRunning="{Binding IsSearching}"
-                IsVisible="{Binding IsSearching}" />
+                IsVisible="{Binding IsSearching}" 
+                InputTransparent="True"/>
 
         </Grid>
 
