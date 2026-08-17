@@ -1,6 +1,7 @@
 ﻿
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using eBaySoldItemAnalyser.API;
 using eBaySoldItemAnalyser.Interfaces;
 using eBaySoldItemAnalyser.Models;
 using eBaySoldItemAnalyser.Services;
@@ -10,7 +11,7 @@ namespace eBaySoldItemAnalyser.ViewModels;
 
 public partial class SearchViewModel : ObservableObject
 {
-    readonly ISoldListingProvider _listingProvider;
+    readonly EbayApiProvider _ebayApiProvider;
     readonly MarketplaceService _marketplaceService;
 
     [ObservableProperty]
@@ -26,26 +27,26 @@ public partial class SearchViewModel : ObservableObject
     string errorMessage = string.Empty;
 
     public ObservableCollection<EbayMarketplace> MarketPlaces { get; }
-    public ObservableCollection<SoldListing> Listings { get; } = [];
+    public ObservableCollection<MarketplaceListing> Listings { get; } = [];
 
     public SearchViewModel(
-        ISoldListingProvider listingProvider,
+        EbayApiProvider ebayApiProvider,
         MarketplaceService marketplaceService)
     {
-        _listingProvider = listingProvider;
+        _ebayApiProvider = ebayApiProvider;
         _marketplaceService = marketplaceService;
 
-
         MarketPlaces = new ObservableCollection<EbayMarketplace>(
-            _marketplaceService.GetMarketplaces());
+        _marketplaceService.GetMarketplaces());
 
-        selectedMarketplace = MarketPlaces.First();
+        SelectedMarketplace = MarketPlaces.First();
     }
 
     [RelayCommand]
     async Task Search()
     {
-        if (string.IsNullOrWhiteSpace(searchTerm) || selectedMarketplace == null)
+        if (string.IsNullOrWhiteSpace(SearchTerm) ||
+            SelectedMarketplace == null)
             return;
 
         IsSearching = true;
@@ -53,45 +54,46 @@ public partial class SearchViewModel : ObservableObject
 
         try
         {
-            var result = await _listingProvider.SearchSoldListingsAsync(
+            var result = await _ebayApiProvider.SearchListingsAsync(
                 SearchTerm,
-                SelectedMarketplace.Domain,
-                SelectedMarketplace.Currency);
+                SelectedMarketplace.MarketplaceId);
 
-            System.Diagnostics.Debug.WriteLine(
-                $"Listings returned: {result.Listings.Count}");
-
-            if (result.Listings.Count == 0)
-            {
-                ErrorMessage = "The search completed, but no sold listings were returned.";
-                return;
-            }
+            System.Diagnostics.Debug.WriteLine($"eBay returned {result.ItemSummaries.Count} listings.");
 
             Listings.Clear();
 
-            foreach (var listing in result.Listings)
+            foreach (var item in result.ItemSummaries)
             {
-                Listings.Add(listing);
+                decimal.TryParse(item.Price?.Value, out var price);
+
+                Listings.Add(new MarketplaceListing
+                {
+                    Title = item.Title,
+                    Price = price,
+                    Currency = item.Price?.Currency ?? string.Empty,
+                    Condition = item.Condition,
+                    ImageUrl = item.Image?.ImageUrl ?? string.Empty,
+                    ListingUrl = item.ItemWebUrl,
+                    BuyingOption = item.BuyingOptions.FirstOrDefault() ?? string.Empty
+                });
+            }
+
+            if (Listings.Count == 0)
+            {
+                ErrorMessage = "No listings were returned for this search.";
             }
         }
-        catch(TaskCanceledException)
+        catch (TaskCanceledException)
         {
             ErrorMessage = "The search took too long. Please try again.";
         }
         catch (HttpRequestException ex)
         {
-            if(ex.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
-            {
-                ErrorMessage = "The sold listings service is currently unavailable. Please try again later.";
-            }
-            else
-            {
-                ErrorMessage = $"HTTP error: {ex.Message}";
-            }
+            ErrorMessage = $"HTTP error: {ex.Message}";
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            ErrorMessage = "Something went wrong while searching.";
+            ErrorMessage = $"Something went wrong: {ex.Message}";
         }
         finally
         {

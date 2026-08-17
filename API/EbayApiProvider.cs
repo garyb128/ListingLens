@@ -1,33 +1,80 @@
-using eBaySoldItemAnalyser.Interfaces;
 using eBaySoldItemAnalyser.Models;
+using Microsoft.Extensions.Configuration;
+using System.Net.Http.Headers;
+using System.Text.Json;
 
 namespace eBaySoldItemAnalyser.API;
 
-/// <summary>
-/// Stub for the official eBay developer API provider.
-///
-/// TODO: implement SearchSoldListingsAsync using the eBay Browse API:
-/// https://developer.ebay.com/api-docs/buy/browse/resources/item_summary/methods/search
-///
-/// Notes for the real implementation:
-/// - The eBay API authenticates with OAuth (Client ID + Client Secret) and
-///   returns an access token, which must be sent as a Bearer token.
-/// - eBay uses marketplace IDs (e.g. "EBAY_GB", "EBAY_US") instead of domains
-///   like "ebay.co.uk". You may want to change the ISoldListingProvider
-///   signature (or add a marketplace-to-id mapping) when implementing this.
-/// - The eBay API returns currency per item in the price object, so the
-///   currency parameter may no longer be needed.
-/// - Search sold items with the filter parameter, e.g.
-///   filter=soldItems:{true}
-/// </summary>
-public class EbayApiProvider : ISoldListingProvider
+public class EbayApiProvider
 {
-    public Task<SearchResult> SearchSoldListingsAsync(
-        string searchTerm,
-        string ebayDomain,
-        string currency)
+    readonly HttpClient _httpClient;
+    readonly EbayAuthService _authService;
+    readonly string _environment;
+
+    public EbayApiProvider(
+        HttpClient httpClient,
+        EbayAuthService authService,
+        IConfiguration configuration)
     {
-        throw new NotImplementedException(
-            "EbayApiProvider not implemented yet. Implement SearchSoldListingsAsync using the eBay developer API.");
+        _httpClient = httpClient;
+        _authService = authService;
+        _environment = configuration["Ebay:Environment"] ?? "Sandbox";
     }
+
+    public async Task<EbayBrowseResponse> SearchListingsAsync(
+        string searchTerm,
+        string marketPlaceId)
+    {
+        var accessToken = await _authService.GetAccessTokenAsync();
+
+        var baseUrl = _environment.Equals(
+            "Production",
+            StringComparison.OrdinalIgnoreCase)
+                ? "https://api.ebay.com"
+                : "https://api.sandbox.ebay.com";
+
+        var url =
+            $"{baseUrl}/buy/browse/v1/item_summary/search" +
+            $"?q={Uri.EscapeDataString(searchTerm)}" +
+            "&limit=10";
+
+        using var request = new HttpRequestMessage(
+            HttpMethod.Get,
+            url);
+
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue(
+                "Bearer",
+                accessToken);
+
+        request.Headers.Add(
+            "X-EBAY-C-MARKETPLACE-ID",
+            marketPlaceId);
+
+        request.Headers.Accept.Add(
+            new MediaTypeWithQualityHeaderValue(
+                "application/json"));
+        
+        var response = await _httpClient.SendAsync(request);
+
+        var json = await response.Content.ReadAsStringAsync();
+
+        System.Diagnostics.Debug.WriteLine(
+            $"eBay response: {(int)response.StatusCode} {response.StatusCode}");
+
+        System.Diagnostics.Debug.WriteLine(json);
+
+        response.EnsureSuccessStatusCode();
+
+        var result = JsonSerializer.Deserialize<EbayBrowseResponse>(json);
+
+        if (result == null)
+        {
+            throw new Exception("Unable to read eBay search response.");
+        }
+
+        return result;
+    }
+
+
 }

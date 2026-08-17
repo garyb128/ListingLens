@@ -19,7 +19,8 @@ public static class MauiProgram
             });
 
         builder.Services.AddHttpClient();
-        builder.Services.AddSingleton<ISoldListingProvider, EbayApiProvider>();
+        builder.Services.AddHttpClient<EbayAuthService>();
+        builder.Services.AddHttpClient<EbayApiProvider>();
         builder.Services.AddSingleton<MarketplaceService>();
         builder.Services.AddTransient<SearchViewModel>();
         builder.Services.AddTransient<AppShell>();

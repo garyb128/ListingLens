@@ -6,4 +6,6 @@ public class EbayMarketplace
 
     public string Domain { get; set; } = string.Empty;
     public string Currency { get; set; } = "";
+
+    public string MarketplaceId { get; set; } = string.Empty;
 }
