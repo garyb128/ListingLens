@@ -23,7 +23,9 @@ public class EbayApiProvider
 
     public async Task<EbayBrowseResponse> SearchListingsAsync(
         string searchTerm,
-        string marketPlaceId)
+        string marketplaceId,
+        string? itemLocationCountry = null,
+        string? deliveryCountry = null)
     {
         var accessToken = await _authService.GetAccessTokenAsync();
 
@@ -36,7 +38,28 @@ public class EbayApiProvider
         var url =
             $"{baseUrl}/buy/browse/v1/item_summary/search" +
             $"?q={Uri.EscapeDataString(searchTerm)}" +
-            "&limit=10";
+            "&limit=100" +
+            "&fieldgroups=FULL";
+
+        var filters = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(itemLocationCountry))
+        {
+            filters.Add(
+                $"itemLocationCountry:{itemLocationCountry}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(deliveryCountry))
+        {
+            filters.Add(
+                $"deliveryCountry:{deliveryCountry}");
+        }
+
+        if (filters.Count > 0)
+        {
+            url += $"&filter={Uri.EscapeDataString(
+                string.Join(",", filters))}";
+        }
 
         using var request = new HttpRequestMessage(
             HttpMethod.Get,
@@ -49,7 +72,7 @@ public class EbayApiProvider
 
         request.Headers.Add(
             "X-EBAY-C-MARKETPLACE-ID",
-            marketPlaceId);
+            marketplaceId);
 
         request.Headers.Accept.Add(
             new MediaTypeWithQualityHeaderValue(

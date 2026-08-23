@@ -8,4 +8,5 @@ public class EbayMarketplace
     public string Currency { get; set; } = "";
 
     public string MarketplaceId { get; set; } = string.Empty;
+    public string CountryCode { get; set;  } = string.Empty;
 }

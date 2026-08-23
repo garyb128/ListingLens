@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace eBaySoldItemAnalyser.Models;
 
@@ -13,6 +14,9 @@ public class EbayItemSummary
     [JsonPropertyName("price")]
     public EbayPrice? Price { get; set; }
 
+    [JsonPropertyName("shippingOptions")]
+    public JsonElement ShippingOptions { get; set; }
+
     [JsonPropertyName("condition")]
     public string Condition { get; set; } = string.Empty;
 
@@ -21,6 +25,8 @@ public class EbayItemSummary
 
     [JsonPropertyName("itemWebUrl")]
     public string ItemWebUrl { get; set; } = string.Empty;
+
+    public string ItemCountry { get; set; } = string.Empty;
 
     [JsonPropertyName("buyingOptions")]
     public List<string> BuyingOptions { get; set; } = [];

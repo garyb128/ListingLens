@@ -13,7 +13,8 @@ public class MarketplaceService
                 Name = "United Kingdom",
                 Domain = "ebay.co.uk",
                 Currency = "GBP",
-                MarketplaceId = "EBAY_GB"
+                MarketplaceId = "EBAY_GB",
+                CountryCode = "GB"
             },
 
             new EbayMarketplace
@@ -21,7 +22,8 @@ public class MarketplaceService
                 Name = "United States",
                 Domain = "ebay.com",
                 Currency = "USD",
-                MarketplaceId = "EBAY_US"
+                MarketplaceId = "EBAY_US",
+                CountryCode = "US"
             },
 
             new EbayMarketplace
@@ -29,7 +31,8 @@ public class MarketplaceService
                 Name = "Germany",
                 Domain = "ebay.de",
                 Currency = "EUR",
-                MarketplaceId = "EBAY_DE"
+                MarketplaceId = "EBAY_DE",
+                CountryCode = "DE"
             },
 
             new EbayMarketplace
@@ -37,7 +40,8 @@ public class MarketplaceService
                 Name = "France",
                 Domain = "ebay.fr",
                 Currency = "EUR",
-                MarketplaceId = "EBAY_FR"
+                MarketplaceId = "EBAY_FR",
+                CountryCode = "FR"
             },
 
             new EbayMarketplace
@@ -45,7 +49,8 @@ public class MarketplaceService
                 Name = "Australia",
                 Domain = "ebay.com.au",
                 Currency = "AUD",
-                MarketplaceId = "EBAY_AU"
+                MarketplaceId = "EBAY_AU",
+                CountryCode = "AU"
             }
         ];
     }

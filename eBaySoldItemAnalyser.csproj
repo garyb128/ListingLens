@@ -75,7 +75,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Statistics\" />
 	  <Folder Include="Views\" />
 	</ItemGroup>
 </Project>
