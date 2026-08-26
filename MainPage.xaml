@@ -1,416 +1,596 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 
-<ContentPage 
+<ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="eBaySoldItemAnalyser.MainPage"
-    x:Name="MainPageRoot">
+    x:Name="MainPageRoot"
+    Shell.NavBarIsVisible="False">
 
-    <Grid Padding="20" RowSpacing="15">
+    <Grid
+        Padding="16"
+        RowSpacing="8">
 
-        <!-- Main page rows -->
         <Grid.RowDefinitions>
+
+            <!-- Title -->
             <RowDefinition Height="Auto"/>
+
+            <!-- Search -->
             <RowDefinition Height="Auto"/>
+
+            <!-- Exclusions -->
             <RowDefinition Height="Auto"/>
+
+            <!-- Marketplace / location / delivery -->
             <RowDefinition Height="Auto"/>
+
+            <!-- Error -->
+            <RowDefinition Height="Auto"/>
+
+            <!-- Statistics -->
+            <RowDefinition Height="Auto"/>
+
+            <!-- Sort -->
+            <RowDefinition Height="Auto"/>
+
+            <!-- Results -->
             <RowDefinition Height="*"/>
+
         </Grid.RowDefinitions>
 
 
-        <!-- Title -->
-        <Label 
+        <!-- =========================================================
+             TITLE
+             ========================================================= -->
+
+        <Label
             Grid.Row="0"
             Text="eBay Sold Item Analyser"
-            FontSize="24" />
+            FontSize="22"
+            FontAttributes="Bold"
+            Margin="0,0,0,2" />
 
 
-        <!-- Search term -->
-        <Entry
-            Grid.Row="1"
-            Placeholder="Search item..."
-            Text="{Binding SearchTerm}" />
+        <!-- =========================================================
+             SEARCH
+             ========================================================= -->
 
-
-        <!-- Marketplace picker -->
-        <Picker
-            Grid.Row="2"
-            Title="Select Marketplace"
-            ItemsSource="{Binding MarketPlaces}"
-            SelectedItem="{Binding SelectedMarketplace}"
-            ItemDisplayBinding="{Binding Name}" />
-
-
-        <!-- Country filters -->
         <Grid
-            Grid.Row="3"
-            ColumnSpacing="15">
+            Grid.Row="1"
+            ColumnSpacing="10">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="400"/>
             </Grid.ColumnDefinitions>
 
 
-            <!-- Item location -->
-            <VerticalStackLayout
+            <Entry
                 Grid.Column="0"
-                Spacing="5">
-
-                <Label
-                    Text="Item location"
-                    FontSize="12"/>
-
-                <Picker
-                    Title="Any country"
-                    ItemsSource="{Binding ItemLocationCountries}"
-                    SelectedItem="{Binding SelectedItemLocationCountry}"
-                    ItemDisplayBinding="{Binding Name}" />
-
-            </VerticalStackLayout>
+                Placeholder="Search item..."
+                Text="{Binding SearchTerm}" />
 
 
-            <!-- Ships to -->
-            <VerticalStackLayout
+            <ActivityIndicator
                 Grid.Column="1"
-                Spacing="5">
+                IsRunning="{Binding IsSearching}"
+                IsVisible="{Binding IsSearching}"
+                VerticalOptions="Center"
+                InputTransparent="True" />
 
-                <Label
-                    Text="Ships to"
-                    FontSize="12"/>
 
-                <Picker
-                    Title="Select country"
-                    ItemsSource="{Binding DeliveryCountries}"
-                    SelectedItem="{Binding SelectedDeliveryCountry}"
-                    ItemDisplayBinding="{Binding Name}" />
-
-            </VerticalStackLayout>
+            <Button
+                Grid.Column="2"
+                Text="Search"
+                Command="{Binding SearchCommand}" />
 
         </Grid>
 
 
-        <!-- Search / statistics / results area -->
+        <!-- =========================================================
+             EXCLUSIONS
+             ========================================================= -->
+
+        <Entry
+            Grid.Row="2"
+            Placeholder="Exclude terms, separated by commas..."
+            Text="{Binding ExcludeTerms}" />
+
+
+        <!-- =========================================================
+     FILTERS
+     ========================================================= -->
+
         <Grid
-            Grid.Row="4"
-            RowSpacing="10">
+    Grid.Row="3"
+    ColumnSpacing="12"
+    RowSpacing="3">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
-
-                <!-- Search button -->
                 <RowDefinition Height="Auto"/>
-
-                <!-- Progress spinner -->
                 <RowDefinition Height="Auto"/>
-
-                <!-- Error message -->
-                <RowDefinition Height="Auto"/>
-
-                <!-- Statistics -->
-                <RowDefinition Height="Auto"/>
-
-                <!-- Sort / listing count -->
-                <RowDefinition Height="Auto"/>
-
-                <!-- Listings -->
-                <RowDefinition Height="*"/>
-
             </Grid.RowDefinitions>
 
 
-            <!-- SEARCH BUTTON -->
-            <Button
-                Grid.Row="0"
-                Text="Search"
-                Command="{Binding SearchCommand}" />
+            <!-- LABELS -->
 
-
-            <!-- SEARCH PROGRESS -->
-            <ActivityIndicator
-                Grid.Row="1"
-                IsRunning="{Binding IsSearching}"
-                IsVisible="{Binding IsSearching}"
-                HorizontalOptions="Center"
-                InputTransparent="True" />
-
-
-            <!-- ERROR MESSAGE -->
             <Label
-                Grid.Row="2"
-                Text="{Binding ErrorMessage}"
-                TextColor="Red"
-                FontSize="14" />
+        Grid.Row="0"
+        Grid.Column="0"
+        Text="Marketplace"
+        FontSize="11"
+        Opacity="0.75" />
+
+            <Label
+        Grid.Row="0"
+        Grid.Column="1"
+        Text="Item location"
+        FontSize="11"
+        Opacity="0.75" />
+
+            <Label
+        Grid.Row="0"
+        Grid.Column="2"
+        Text="Ships to"
+        FontSize="11"
+        Opacity="0.75" />
 
 
-            <!-- MARKET STATISTICS -->
-            <Border
-                Grid.Row="3"
-                Padding="15"
-                IsVisible="{Binding HasStatistics}">
+            <!-- PICKERS -->
 
-                <VerticalStackLayout Spacing="12">
+            <Picker
+        Grid.Row="1"
+        Grid.Column="0"
+        ItemsSource="{Binding MarketPlaces}"
+        SelectedItem="{Binding SelectedMarketplace}"
+        ItemDisplayBinding="{Binding Name}"
+        HorizontalOptions="Fill" />
 
-                    <Label
-                        Text="Market Summary"
-                        FontSize="18"
-                        FontAttributes="Bold" />
+            <Picker
+        Grid.Row="1"
+        Grid.Column="1"
+        ItemsSource="{Binding ItemLocationCountries}"
+        SelectedItem="{Binding SelectedItemLocationCountry}"
+        ItemDisplayBinding="{Binding Name}"
+        HorizontalOptions="Fill" />
 
+            <Picker
+        Grid.Row="1"
+        Grid.Column="2"
+        ItemsSource="{Binding DeliveryCountries}"
+        SelectedItem="{Binding SelectedDeliveryCountry}"
+        ItemDisplayBinding="{Binding Name}"
+        HorizontalOptions="Fill" />
+
+        </Grid>
+
+
+        <!-- =========================================================
+             ERROR MESSAGE
+             ========================================================= -->
+
+        <Label
+            Grid.Row="4"
+            Text="{Binding ErrorMessage}"
+            TextColor="Red"
+            FontSize="13" />
+
+
+        <!-- =========================================================
+             MARKET SUMMARY
+             ========================================================= -->
+
+        <Border
+            Grid.Row="5"
+            Padding="12"
+            StrokeThickness="1"
+            IsVisible="{Binding HasStatistics}">
+
+            <Grid
+                RowSpacing="8">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+
+                <!-- HEADER -->
+                <Label
+                    Grid.Row="0"
+                    Text="Market Summary"
+                    FontSize="17"
+                    FontAttributes="Bold" />
+
+
+                <!-- STATISTICS -->
+                <Grid
+                    Grid.Row="1"
+                    ColumnSpacing="30">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+
+                    <!-- =====================
+                         LOW
+                         ===================== -->
 
                     <Grid
-                        ColumnSpacing="30"
-                        RowSpacing="8">
+                        Grid.Column="0"
+                        RowSpacing="4"
+                        ColumnSpacing="10">
 
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                        <!-- LOW -->
-                        <VerticalStackLayout
+
+                        <Label
+                            Grid.Row="0"
                             Grid.Column="0"
-                            Spacing="8">
+                            Text="Lowest"
+                            FontSize="11"
+                            Opacity="0.7"
+                            VerticalOptions="Center" />
 
-                            <Label
-                                Text="Lowest"
-                                FontSize="12"/>
-
-                            <Label
-                                Text="{Binding Statistics.LowestDisplay}"
-                                FontSize="18"
-                                FontAttributes="Bold"/>
-
-                            <Label
-                                Text="Typical Low"
-                                FontSize="12"
-                                Margin="0,5,0,0"/>
-
-                            <Label
-                                Text="{Binding Statistics.TypicalLowDisplay}"
-                                FontSize="18"
-                                FontAttributes="Bold"/>
-
-                        </VerticalStackLayout>
-
-
-                        <!-- CENTRE -->
-                        <VerticalStackLayout
+                        <Label
+                            Grid.Row="0"
                             Grid.Column="1"
-                            Spacing="8">
-
-                            <Label
-                                Text="Median"
-                                FontSize="12"/>
-
-                            <Label
-                                Text="{Binding Statistics.MedianDisplay}"
-                                FontSize="18"
-                                FontAttributes="Bold"/>
-
-                            <Label
-                                Text="Average"
-                                FontSize="12"
-                                Margin="0,5,0,0"/>
-
-                            <Label
-                                Text="{Binding Statistics.AverageDisplay}"
-                                FontSize="18"
-                                FontAttributes="Bold"/>
-
-                        </VerticalStackLayout>
+                            Text="{Binding Statistics.LowestDisplay}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            VerticalOptions="Center" />
 
 
-                        <!-- HIGH -->
-                        <VerticalStackLayout
-                            Grid.Column="2"
-                            Spacing="8">
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Text="Typical Low"
+                            FontSize="11"
+                            Opacity="0.7"
+                            VerticalOptions="Center" />
 
-                            <Label
-                                Text="Typical High"
-                                FontSize="12"/>
-
-                            <Label
-                                Text="{Binding Statistics.TypicalHighDisplay}"
-                                FontSize="18"
-                                FontAttributes="Bold"/>
-
-                            <Label
-                                Text="Highest"
-                                FontSize="12"
-                                Margin="0,5,0,0"/>
-
-                            <Label
-                                Text="{Binding Statistics.HighestDisplay}"
-                                FontSize="18"
-                                FontAttributes="Bold"/>
-
-                        </VerticalStackLayout>
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Text="{Binding Statistics.TypicalLowDisplay}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            VerticalOptions="Center" />
 
                     </Grid>
 
-                </VerticalStackLayout>
 
-            </Border>
+                    <!-- =====================
+                         CENTRE
+                         ===================== -->
+
+                    <Grid
+                        Grid.Column="1"
+                        RowSpacing="4"
+                        ColumnSpacing="10">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
 
-            <!-- SORT / NUMBER OF RESULTS -->
-            <Grid 
-                Grid.Row="4"
-                IsVisible="{Binding HasStatistics}">
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Text="Median"
+                            FontSize="11"
+                            Opacity="0.7"
+                            VerticalOptions="Center" />
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Text="{Binding Statistics.MedianDisplay}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            VerticalOptions="Center" />
 
-                <Label
-                    Grid.Column="0"
-                    Text="Sort:"
-                    VerticalOptions="Center"
-                    Margin="0,0,8,0"/>
 
-                <Picker
-                    Grid.Column="1"
-                    ItemsSource="{Binding SortOptions}"
-                    SelectedItem="{Binding SelectedSortOption}"
-                    HorizontalOptions="Start"
-                    WidthRequest="190"/>
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Text="Average"
+                            FontSize="11"
+                            Opacity="0.7"
+                            VerticalOptions="Center" />
 
-                <Label
-                    Grid.Column="2"
-                    Text="{Binding Listings.Count, StringFormat='{}{0} listings shown'}"
-                    FontSize="12"
-                    Opacity="0.7"
-                    VerticalOptions="Center"/>
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Text="{Binding Statistics.AverageDisplay}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            VerticalOptions="Center" />
+
+                    </Grid>
+
+
+                    <!-- =====================
+                         HIGH
+                         ===================== -->
+
+                    <Grid
+                        Grid.Column="2"
+                        RowSpacing="4"
+                        ColumnSpacing="10">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Text="Typical High"
+                            FontSize="11"
+                            Opacity="0.7"
+                            VerticalOptions="Center" />
+
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Text="{Binding Statistics.TypicalHighDisplay}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            VerticalOptions="Center" />
+
+
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Text="Highest"
+                            FontSize="11"
+                            Opacity="0.7"
+                            VerticalOptions="Center" />
+
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Text="{Binding Statistics.HighestDisplay}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            VerticalOptions="Center" />
+
+                    </Grid>
+
+                </Grid>
 
             </Grid>
 
-
-            <!-- LISTINGS -->
-            <CollectionView
-                Grid.Row="5"
-                ItemsSource="{Binding Listings}">
-
-                <CollectionView.ItemTemplate>
-
-                    <DataTemplate>
-
-                        <Border
-            Padding="12"
-            Margin="0,0,0,10"
-            StrokeThickness="1">
-
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="8"/>
-                            </Border.StrokeShape>
+        </Border>
 
 
-                            <!-- Click anywhere on listing to open eBay -->
-                            <Border.GestureRecognizers>
+        <!-- =========================================================
+             SORT / RESULT COUNT
+             ========================================================= -->
 
-                                <TapGestureRecognizer
-                    Command="{Binding Source={x:Reference MainPageRoot},
-                                      Path=BindingContext.OpenListingCommand}"
-                    CommandParameter="{Binding .}" />
+        <Grid
+            Grid.Row="6"
+            IsVisible="{Binding HasStatistics}"
+            ColumnSpacing="8">
 
-                            </Border.GestureRecognizers>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
 
-                            <Grid ColumnSpacing="15">
+            <Label
+                Grid.Column="0"
+                Text="Sort:"
+                VerticalOptions="Center"
+                FontSize="12" />
+
+
+            <Picker
+                Grid.Column="1"
+                ItemsSource="{Binding SortOptions}"
+                SelectedItem="{Binding SelectedSortOption}"
+                WidthRequest="190" />
+
+
+            <Label
+                Grid.Column="3"
+                Text="{Binding Listings.Count,
+                               StringFormat='{}{0} listings shown'}"
+                FontSize="12"
+                Opacity="0.65"
+                VerticalOptions="Center" />
+
+        </Grid>
+
+
+        <!-- =========================================================
+             LISTINGS
+             ========================================================= -->
+
+        <CollectionView
+            Grid.Row="7"
+            ItemsSource="{Binding Listings}"
+            SelectionMode="None">
+
+            <CollectionView.ItemTemplate>
+
+                <DataTemplate>
+
+                    <Border
+                        Padding="12"
+                        Margin="0,0,0,8"
+                        StrokeThickness="1">
+
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="7"/>
+                        </Border.StrokeShape>
+
+
+                        <!-- CLICK TO OPEN EBAY -->
+                        <Border.GestureRecognizers>
+
+                            <TapGestureRecognizer
+                                Command="{Binding Source={x:Reference MainPageRoot},
+                                                  Path=BindingContext.OpenListingCommand}"
+                                CommandParameter="{Binding .}" />
+
+                        </Border.GestureRecognizers>
+
+
+                        <Grid
+                            RowSpacing="8">
+
+                            <Grid.RowDefinitions>
+
+                                <!-- Title -->
+                                <RowDefinition Height="Auto"/>
+
+                                <!-- Listing information -->
+                                <RowDefinition Height="Auto"/>
+
+                            </Grid.RowDefinitions>
+
+
+                            <!-- TITLE -->
+                            <Label
+                                Grid.Row="0"
+                                Text="{Binding Title}"
+                                FontSize="17"
+                                FontAttributes="Bold"
+                                MaxLines="2"
+                                LineBreakMode="TailTruncation" />
+
+
+                            <!-- CONTENT -->
+                            <Grid
+                                Grid.Row="1"
+                                ColumnSpacing="15">
 
                                 <Grid.ColumnDefinitions>
 
                                     <!-- Image -->
-                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="100"/>
 
-                                    <!-- Listing information -->
+                                    <!-- Details -->
                                     <ColumnDefinition Width="*"/>
 
-                                    <!-- Total price -->
-                                    <ColumnDefinition Width="Auto"/>
+                                    <!-- Total -->
+                                    <ColumnDefinition Width="150"/>
 
                                 </Grid.ColumnDefinitions>
 
 
                                 <!-- IMAGE -->
                                 <Image
-                    Grid.Column="0"
-                    Source="{Binding ImageUrl}"
-                    HeightRequest="120"
-                    WidthRequest="120"
-                    Aspect="AspectFit" />
+                                    Grid.Column="0"
+                                    Source="{Binding ImageUrl}"
+                                    HeightRequest="100"
+                                    WidthRequest="100"
+                                    Aspect="AspectFit" />
 
 
-                                <!-- LISTING DETAILS -->
+                                <!-- DETAILS -->
                                 <VerticalStackLayout
-                    Grid.Column="1"
-                    Spacing="3">
+                                    Grid.Column="1"
+                                    Spacing="4"
+                                    VerticalOptions="Center">
 
                                     <Label
-                        Text="{Binding Title}"
-                        FontSize="18" />
+                                        Text="{Binding ItemPriceDisplay}"
+                                        FontSize="14" />
 
                                     <Label
-                        Text="{Binding ItemPriceDisplay}"
-                        FontSize="14" />
+                                        Text="{Binding ShippingPriceDisplay}"
+                                        FontSize="14" />
 
                                     <Label
-                        Text="{Binding ShippingPriceDisplay}"
-                        FontSize="14" />
+                                        Text="{Binding Condition}"
+                                        FontSize="13"
+                                        Opacity="0.85"
+                                        Margin="0,5,0,0" />
 
                                     <Label
-                        Text="{Binding Condition}"
-                        FontSize="14"
-                        Margin="0,5,0,0" />
-
-                                    <Label
-                        Text="{Binding BuyingOption}"
-                        FontSize="12" />
+                                        Text="{Binding BuyingOption}"
+                                        FontSize="12"
+                                        Opacity="0.65" />
 
                                 </VerticalStackLayout>
 
 
-                                <!-- TOTAL PRICE -->
+                                <!-- TOTAL -->
                                 <VerticalStackLayout
-                    Grid.Column="2"
-                    VerticalOptions="Center"
-                    HorizontalOptions="End"
-                    Margin="20,0,5,0"
-                    Spacing="3">
+                                    Grid.Column="2"
+                                    Spacing="3"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="End">
 
                                     <Label
-                        Text="Total"
-                        FontSize="12"
-                        HorizontalTextAlignment="End"
-                        Opacity="0.7" />
+                                        Text="Total"
+                                        FontSize="11"
+                                        Opacity="0.65"
+                                        HorizontalTextAlignment="End" />
 
                                     <Label
-                        Text="{Binding TotalPriceDisplay}"
-                        FontSize="20"
-                        FontAttributes="Bold"
-                        HorizontalTextAlignment="End" />
+                                        Text="{Binding TotalPriceDisplay}"
+                                        FontSize="21"
+                                        FontAttributes="Bold"
+                                        HorizontalTextAlignment="End" />
 
                                     <Label
-                        Text="Item + P&amp;P"
-                        FontSize="11"
-                        HorizontalTextAlignment="End"
-                        Opacity="0.6" />
+                                        Text="Item + P&amp;P"
+                                        FontSize="10"
+                                        Opacity="0.5"
+                                        HorizontalTextAlignment="End" />
 
                                 </VerticalStackLayout>
 
                             </Grid>
 
-                        </Border>
+                        </Grid>
 
-                    </DataTemplate>
+                    </Border>
 
-                </CollectionView.ItemTemplate>
+                </DataTemplate>
 
-            </CollectionView>
+            </CollectionView.ItemTemplate>
 
-        </Grid>
+        </CollectionView>
 
     </Grid>
 

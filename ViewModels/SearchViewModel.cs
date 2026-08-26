@@ -26,6 +26,8 @@ public partial class SearchViewModel : ObservableObject
 
     [ObservableProperty]
     string errorMessage = string.Empty;
+    [ObservableProperty]
+    string excludeTerms = string.Empty;
 
     [ObservableProperty]
     CountryOption? selectedItemLocationCountry;
@@ -139,8 +141,21 @@ public partial class SearchViewModel : ObservableObject
 
             Listings.Clear();
 
+            var exclusions = ExcludeTerms
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .ToList();
+
             foreach (var item in result.ItemSummaries)
             {
+                var shouldExclude = exclusions.Any(exclusion =>
+                    item.Title.Contains(exclusion,
+                    StringComparison.OrdinalIgnoreCase));
+
+                if (shouldExclude)
+                    continue;
+
                 decimal.TryParse(item.Price?.Value, out var price);
 
                 decimal? shippingPrice = null;
