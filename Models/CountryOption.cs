@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace eBaySoldItemAnalyser.Models
+namespace ListingLens.Models
 {
     public class CountryOption
     {

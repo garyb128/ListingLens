@@ -1,6 +1,6 @@
-﻿using eBaySoldItemAnalyser.ViewModels;
+﻿using ListingLens.ViewModels;
 
-namespace eBaySoldItemAnalyser
+namespace ListingLens
 {
     public partial class MainPage : ContentPage
     {

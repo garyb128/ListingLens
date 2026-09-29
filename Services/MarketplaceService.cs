@@ -1,6 +1,6 @@
-﻿using eBaySoldItemAnalyser.Models;
+﻿using ListingLens.Models;
 
-namespace eBaySoldItemAnalyser.Services;
+namespace ListingLens.Services;
 
 public class MarketplaceService
 {

@@ -1,19 +1,20 @@
-﻿
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using eBaySoldItemAnalyser.API;
-using eBaySoldItemAnalyser.Statistics;
-using eBaySoldItemAnalyser.Models;
-using eBaySoldItemAnalyser.Services;
+using ListingLens.API;
+using ListingLens.Statistics;
+using ListingLens.Models;
+using ListingLens.Services;
 using Microsoft.Maui.ApplicationModel;
 using System.Collections.ObjectModel;
 
-namespace eBaySoldItemAnalyser.ViewModels;
+namespace ListingLens.ViewModels;
 
 public partial class SearchViewModel : ObservableObject
 {
     readonly EbayApiProvider _ebayApiProvider;
     readonly MarketplaceService _marketplaceService;
+    readonly EbayCredentialStore _credentialStore;
 
     [ObservableProperty]
     string searchTerm = string.Empty;
@@ -43,6 +44,29 @@ public partial class SearchViewModel : ObservableObject
 
     [ObservableProperty]
     bool hasStatistics;
+
+    // ----- eBay API key settings -----
+
+    [ObservableProperty]
+    bool isSettingsVisible;
+
+    [ObservableProperty]
+    string clientIdInput = string.Empty;
+
+    [ObservableProperty]
+    string clientSecretInput = string.Empty;
+
+    [ObservableProperty]
+    string selectedEnvironment = "Production";
+
+    [ObservableProperty]
+    string settingsMessage = string.Empty;
+
+    [ObservableProperty]
+    bool hasSavedCredentials;
+
+    public ObservableCollection<string> Environments { get; } =
+        ["Production", "Sandbox"];
 
     public ObservableCollection<EbayMarketplace> MarketPlaces { get; }
 
@@ -83,10 +107,12 @@ public partial class SearchViewModel : ObservableObject
 
     public SearchViewModel(
         EbayApiProvider ebayApiProvider,
-        MarketplaceService marketplaceService)
+        MarketplaceService marketplaceService,
+        EbayCredentialStore credentialStore)
     {
         _ebayApiProvider = ebayApiProvider;
         _marketplaceService = marketplaceService;
+        _credentialStore = credentialStore;
 
         MarketPlaces = new ObservableCollection<EbayMarketplace>(_marketplaceService.GetMarketplaces());
 
@@ -95,6 +121,77 @@ public partial class SearchViewModel : ObservableObject
         SelectedItemLocationCountry = ItemLocationCountries.First();
 
         SelectedDeliveryCountry = DeliveryCountries.FirstOrDefault(x => x.Code == SelectedMarketplace.CountryCode);
+
+        _ = LoadCredentialsAsync();
+    }
+
+    async Task LoadCredentialsAsync()
+    {
+        var credentials = await _credentialStore.GetAsync();
+
+        HasSavedCredentials = credentials != null;
+
+        if (credentials == null)
+        {
+            // First run: prompt for the user's own keys.
+            IsSettingsVisible = true;
+            SettingsMessage = "Enter your own eBay API keys to get started.";
+            return;
+        }
+
+        ClientIdInput = credentials.ClientId;
+        SelectedEnvironment = credentials.IsProduction ? "Production" : "Sandbox";
+    }
+
+    [RelayCommand]
+    void ToggleSettings()
+    {
+        IsSettingsVisible = !IsSettingsVisible;
+        SettingsMessage = string.Empty;
+    }
+
+    [RelayCommand]
+    async Task SaveCredentials()
+    {
+        if (string.IsNullOrWhiteSpace(ClientIdInput))
+        {
+            SettingsMessage = "Enter your eBay Client ID (App ID).";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(ClientSecretInput) && !HasSavedCredentials)
+        {
+            SettingsMessage = "Enter your eBay Client Secret (Cert ID).";
+            return;
+        }
+
+        try
+        {
+            await _credentialStore.SaveAsync(
+                ClientIdInput,
+                ClientSecretInput,
+                SelectedEnvironment);
+
+            ClientSecretInput = string.Empty;
+            HasSavedCredentials = true;
+            SettingsMessage = "Saved. Your keys are stored on this device only.";
+            ErrorMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            SettingsMessage = $"Couldn't store the keys securely on this device: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    void ClearCredentials()
+    {
+        _credentialStore.Clear();
+
+        ClientIdInput = string.Empty;
+        ClientSecretInput = string.Empty;
+        HasSavedCredentials = false;
+        SettingsMessage = "Saved keys removed.";
     }
 
     [RelayCommand]
@@ -221,6 +318,11 @@ public partial class SearchViewModel : ObservableObject
             {
                 ErrorMessage = "No listings were returned for this search.";
             }
+        }
+        catch (MissingCredentialsException ex)
+        {
+            ErrorMessage = ex.Message;
+            IsSettingsVisible = true;
         }
         catch (TaskCanceledException)
         {

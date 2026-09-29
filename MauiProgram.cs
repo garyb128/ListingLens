@@ -1,8 +1,8 @@
-﻿using eBaySoldItemAnalyser;
-using eBaySoldItemAnalyser.API;
-using eBaySoldItemAnalyser.Interfaces;
-using eBaySoldItemAnalyser.Services;
-using eBaySoldItemAnalyser.ViewModels;
+using ListingLens;
+using ListingLens.API;
+using ListingLens.Interfaces;
+using ListingLens.Services;
+using ListingLens.ViewModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +19,7 @@ public static class MauiProgram
             });
 
         builder.Services.AddHttpClient();
+        builder.Services.AddSingleton<EbayCredentialStore>();
         builder.Services.AddHttpClient<EbayAuthService>();
         builder.Services.AddHttpClient<EbayApiProvider>();
         builder.Services.AddSingleton<MarketplaceService>();
@@ -28,12 +29,13 @@ public static class MauiProgram
 
         var assembly = typeof(MauiProgram).Assembly;
 
-        using var stream = assembly.GetManifestResourceStream("eBaySoldItemAnalyser.appsettings.json");
+        using var stream = assembly.GetManifestResourceStream("ListingLens.appsettings.json");
 
         if (stream != null)
             builder.Configuration.AddJsonStream(stream);
 
         builder.Configuration.AddUserSecrets(assembly);
+        builder.Configuration.AddEnvironmentVariables();
 
 #if DEBUG
         builder.Logging.AddDebug();

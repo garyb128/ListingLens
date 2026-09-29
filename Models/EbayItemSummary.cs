@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace eBaySoldItemAnalyser.Models;
+namespace ListingLens.Models;
 
 public class EbayItemSummary
 {

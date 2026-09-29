@@ -1,4 +1,4 @@
-﻿namespace eBaySoldItemAnalyser;
+﻿namespace ListingLens;
 
 public partial class AppShell : Shell
 {

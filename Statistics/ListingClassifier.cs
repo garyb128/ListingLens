@@ -1,6 +1,6 @@
-﻿using eBaySoldItemAnalyser.Models;
+﻿using ListingLens.Models;
 
-namespace eBaySoldItemAnalyser.Statistics;
+namespace ListingLens.Statistics;
 
 public static class ListingClassifier
 {

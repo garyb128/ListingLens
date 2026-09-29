@@ -1,24 +1,24 @@
-using eBaySoldItemAnalyser.Models;
-using Microsoft.Extensions.Configuration;
+using ListingLens.Models;
+using ListingLens.Services;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace eBaySoldItemAnalyser.API;
+namespace ListingLens.API;
 
 public class EbayApiProvider
 {
     readonly HttpClient _httpClient;
     readonly EbayAuthService _authService;
-    readonly string _environment;
+    readonly EbayCredentialStore _credentialStore;
 
     public EbayApiProvider(
         HttpClient httpClient,
         EbayAuthService authService,
-        IConfiguration configuration)
+        EbayCredentialStore credentialStore)
     {
         _httpClient = httpClient;
         _authService = authService;
-        _environment = configuration["Ebay:Environment"] ?? "Sandbox";
+        _credentialStore = credentialStore;
     }
 
     public async Task<EbayBrowseResponse> SearchListingsAsync(
@@ -27,13 +27,12 @@ public class EbayApiProvider
         string? itemLocationCountry = null,
         string? deliveryCountry = null)
     {
-        var accessToken = await _authService.GetAccessTokenAsync();
+        var credentials = await _credentialStore.GetAsync()
+            ?? throw new MissingCredentialsException();
 
-        var baseUrl = _environment.Equals(
-            "Production",
-            StringComparison.OrdinalIgnoreCase)
-                ? "https://api.ebay.com"
-                : "https://api.sandbox.ebay.com";
+        var accessToken = await _authService.GetAccessTokenAsync(credentials);
+
+        var baseUrl = credentials.ApiBaseUrl;
 
         var url =
             $"{baseUrl}/buy/browse/v1/item_summary/search" +

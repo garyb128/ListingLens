@@ -1,6 +1,6 @@
-﻿using eBaySoldItemAnalyser.Models;
+﻿using ListingLens.Models;
 
-namespace eBaySoldItemAnalyser.Interfaces;
+namespace ListingLens.Interfaces;
 
 public interface ISoldListingProvider
 {

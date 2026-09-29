@@ -1,85 +1,79 @@
-﻿using eBaySoldItemAnalyser.Models;
-using Microsoft.Extensions.Configuration;
+using ListingLens.Models;
+using ListingLens.Services;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-namespace eBaySoldItemAnalyser.API;
+namespace ListingLens.API;
 
 public class EbayAuthService
 {
+    // Cached per app run, shared across the transient instances created by the HttpClient factory.
+    static string? _accessToken;
+    static string? _tokenKey;
+    static DateTimeOffset _tokenExpiresAt;
+
     readonly HttpClient _httpClient;
-    readonly string _clientId;
-    readonly string _clientSecret;
-    readonly string _environment;
 
-    string? _accessToken;
-    DateTimeOffset _tokenExpiresAt;
-
-    public EbayAuthService(HttpClient httpClient, IConfiguration configuration)
+    public EbayAuthService(HttpClient httpClient)
     {
         _httpClient = httpClient;
-
-        _clientId = configuration["Ebay:ClientId"]
-            ?? throw new Exception("eBay Client ID is missing");
-
-        _clientSecret = configuration["Ebay:ClientSecret"]
-            ?? throw new Exception("eBay Client Secret is missing");
-
-        _environment = configuration["Ebay:Environment"] ?? "Sandbox";
     }
 
-    public async Task<string> GetAccessTokenAsync()
+    public async Task<string> GetAccessTokenAsync(EbayCredentials credentials)
     {
-        if(!string.IsNullOrWhiteSpace(_accessToken) &&
+        var tokenKey = $"{credentials.Environment}|{credentials.ClientId}|{credentials.ClientSecret}";
+
+        if (!string.IsNullOrWhiteSpace(_accessToken) &&
+            _tokenKey == tokenKey &&
             DateTimeOffset.UtcNow < _tokenExpiresAt)
         {
             return _accessToken;
         }
 
-        var tokenUrl = _environment.Equals(
-            "Production",
-            StringComparison.OrdinalIgnoreCase)
-                ? "https://api.ebay.com/identity/v1/oauth2/token"
-                : "https://api.sandbox.ebay.com/identity/v1/oauth2/token";
+        var tokenUrl = $"{credentials.ApiBaseUrl}/identity/v1/oauth2/token";
 
-        var credentials = Convert.ToBase64String(
-            Encoding.UTF8.GetBytes($"{_clientId}:{_clientSecret}"));
+        var encoded = Convert.ToBase64String(
+            Encoding.UTF8.GetBytes($"{credentials.ClientId}:{credentials.ClientSecret}"));
 
         using var request = new HttpRequestMessage(
             HttpMethod.Post,
             tokenUrl);
 
-        request.Headers.Authorization = new AuthenticationHeaderValue("Basic", credentials);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Basic", encoded);
 
         request.Content = new FormUrlEncodedContent(
             [
                 new KeyValuePair<string, string>(
                     "grant_type",
-                    "client_credentials"
-                    ),
-                
+                    "client_credentials"),
+
                 new KeyValuePair<string, string>(
                     "scope",
-                    "https://api.ebay.com/oauth/api_scope"
-                    )
+                    "https://api.ebay.com/oauth/api_scope")
             ]);
 
         var response = await _httpClient.SendAsync(request);
 
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception(
+                $"eBay rejected the API keys ({(int)response.StatusCode}). " +
+                "Check the Client ID, Client Secret and that Environment (Sandbox/Production) matches your keyset.");
+        }
 
         var json = await response.Content.ReadAsStringAsync();
 
         var tokenResponse = JsonSerializer.Deserialize<EbayTokenResponse>(json);
 
-        if(tokenResponse == null ||
+        if (tokenResponse == null ||
             string.IsNullOrWhiteSpace(tokenResponse.AccessToken))
         {
             throw new Exception("eBay did not return a valid access token");
         }
 
         _accessToken = tokenResponse.AccessToken;
+        _tokenKey = tokenKey;
 
         _tokenExpiresAt = DateTimeOffset.UtcNow
             .AddSeconds(tokenResponse.ExpiresIn)

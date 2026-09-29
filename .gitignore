@@ -399,3 +399,7 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Local credentials - never commit
+Resources/Raw/appsettings.json
+secrets.json

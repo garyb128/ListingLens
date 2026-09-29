@@ -1,9 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="eBaySoldItemAnalyser.MainPage"
+    x:Class="ListingLens.MainPage"
     x:Name="MainPageRoot"
     Shell.NavBarIsVisible="False">
 
@@ -44,12 +44,83 @@
              TITLE
              ========================================================= -->
 
-        <Label
+        <VerticalStackLayout
             Grid.Row="0"
-            Text="eBay Sold Item Analyser"
-            FontSize="22"
-            FontAttributes="Bold"
-            Margin="0,0,0,2" />
+            Spacing="8">
+
+            <Grid ColumnDefinitions="*,Auto">
+
+                <Label
+                    Text="ListingLens"
+                    FontSize="22"
+                    FontAttributes="Bold"
+                    VerticalOptions="Center"
+                    Margin="0,0,0,2" />
+
+                <Button
+                    Grid.Column="1"
+                    Text="API keys"
+                    Command="{Binding ToggleSettingsCommand}" />
+
+            </Grid>
+
+            <Border
+                Padding="12"
+                StrokeThickness="1"
+                IsVisible="{Binding IsSettingsVisible}">
+
+                <VerticalStackLayout Spacing="6">
+
+                    <Label
+                        Text="eBay API keys"
+                        FontAttributes="Bold" />
+
+                    <Label
+                        Text="ListingLens uses your own eBay developer keys (developer.ebay.com). They are stored on this device only."
+                        FontSize="12"
+                        Opacity="0.75" />
+
+                    <Entry
+                        Placeholder="Client ID (App ID)"
+                        Text="{Binding ClientIdInput}" />
+
+                    <Entry
+                        Placeholder="Client Secret (Cert ID) - leave blank to keep the saved one"
+                        IsPassword="True"
+                        Text="{Binding ClientSecretInput}" />
+
+                    <Picker
+                        Title="Environment"
+                        ItemsSource="{Binding Environments}"
+                        SelectedItem="{Binding SelectedEnvironment}" />
+
+                    <Label
+                        Text="Use Production for real listings. Sandbox returns very little data."
+                        FontSize="11"
+                        Opacity="0.75" />
+
+                    <HorizontalStackLayout Spacing="8">
+
+                        <Button
+                            Text="Save"
+                            Command="{Binding SaveCredentialsCommand}" />
+
+                        <Button
+                            Text="Remove saved keys"
+                            Command="{Binding ClearCredentialsCommand}"
+                            IsVisible="{Binding HasSavedCredentials}" />
+
+                    </HorizontalStackLayout>
+
+                    <Label
+                        Text="{Binding SettingsMessage}"
+                        FontSize="12" />
+
+                </VerticalStackLayout>
+
+            </Border>
+
+        </VerticalStackLayout>
 
 
         <!-- =========================================================

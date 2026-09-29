@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace eBaySoldItemAnalyser
+namespace ListingLens
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

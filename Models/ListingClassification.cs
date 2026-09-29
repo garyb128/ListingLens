@@ -1,4 +1,4 @@
-﻿using eBaySoldItemAnalyser.Models;
+﻿using ListingLens.Models;
 
 public enum ListingClassification
 {
