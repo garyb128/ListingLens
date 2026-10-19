@@ -7,6 +7,7 @@ using ListingLens.Models;
 using ListingLens.Services;
 using Microsoft.Maui.ApplicationModel;
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace ListingLens.ViewModels;
 
@@ -17,12 +18,15 @@ public partial class SearchViewModel : ObservableObject
     readonly EbayCredentialStore _credentialStore;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SearchCommand))]
     string searchTerm = string.Empty;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SearchCommand))]
     EbayMarketplace? selectedMarketplace;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SearchCommand))]
     bool isSearching;
 
     [ObservableProperty]
@@ -177,6 +181,10 @@ public partial class SearchViewModel : ObservableObject
             SettingsMessage = "Saved. Your keys are stored on this device only.";
             ErrorMessage = string.Empty;
         }
+        catch (EbayApiException ex)
+        {
+            ErrorMessage = ex.Message;
+        }
         catch (Exception ex)
         {
             SettingsMessage = $"Couldn't store the keys securely on this device: {ex.Message}";
@@ -207,13 +215,20 @@ public partial class SearchViewModel : ObservableObject
         {
             await Launcher.Default.OpenAsync(uri);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             ErrorMessage = $"Unable to open listing: {ex.Message}";
         }
     }
 
-    [RelayCommand]
+    bool CanSearch()
+    {
+        return !IsSearching
+            && !string.IsNullOrWhiteSpace(SearchTerm)
+            && SelectedMarketplace != null;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSearch))]
     async Task Search()
     {
         if (string.IsNullOrWhiteSpace(SearchTerm) ||
@@ -253,7 +268,7 @@ public partial class SearchViewModel : ObservableObject
                 if (shouldExclude)
                     continue;
 
-                decimal.TryParse(item.Price?.Value, out var price);
+                decimal.TryParse(item.Price?.Value, CultureInfo.InvariantCulture, out var price);
 
                 decimal? shippingPrice = null;
 
@@ -263,14 +278,19 @@ public partial class SearchViewModel : ObservableObject
                     {
                         if (shippingOption.TryGetProperty("shippingCost", out var shippingCost))
                         {
-                            if(shippingCost.TryGetProperty(
+                            if (shippingCost.TryGetProperty(
                                 "value",
                                 out var shippingValue) &&
                                 decimal.TryParse(
                                     shippingValue.GetString(),
+                                    CultureInfo.InvariantCulture,
                                     out var shipping))
                             {
-                                shippingPrice = shipping;
+                                if (shipping >= 0 &&
+                                    (shippingPrice == null || shipping < shippingPrice.Value))
+                                {
+                                    shippingPrice = shipping;
+                                }
                             }
                         }
                     }
@@ -302,6 +322,8 @@ public partial class SearchViewModel : ObservableObject
             Statistics = StatisticsCalculator.Calculate(Listings);
             HasStatistics = Statistics.ListingCount > 0;
 
+            ApplySort();
+
             var comparableCount = Listings.Count(x => x.IsComparable);
 
             var comparableRatio = Listings.Count > 0
@@ -327,6 +349,10 @@ public partial class SearchViewModel : ObservableObject
         catch (TaskCanceledException)
         {
             ErrorMessage = "The search took too long. Please try again.";
+        }
+        catch (EbayApiException ex)
+        {
+            ErrorMessage = ex.Message;
         }
         catch (HttpRequestException ex)
         {

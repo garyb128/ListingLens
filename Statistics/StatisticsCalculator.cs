@@ -28,15 +28,13 @@ namespace ListingLens.Statistics
             {
                 var middle = values.Count / 2;
 
-                if(values.Count % 2 == 0)
+                if (values.Count % 2 == 0)
                 {
                     return (values[middle - 1] + values[middle]) / 2m;
                 }
 
                 return values[middle];
             }
-
-            var median = CalculateMedian(prices);
 
             var middle = prices.Count / 2;
 
@@ -48,11 +46,8 @@ namespace ListingLens.Statistics
                 .Skip(prices.Count % 2 == 0 ? middle : middle + 1)
                 .ToList();
 
-            var lowest = prices.First();
-            var highest = prices.Last();
-
-            var lowerQuartile = CalculateMedian(lowerHalf);
-            var upperQuartile = CalculateMedian(upperHalf);
+            var lowerQuartile = lowerHalf.Count == 0 ? prices[0] : CalculateMedian(lowerHalf);
+            var upperQuartile = upperHalf.Count == 0 ? prices[0] : CalculateMedian(upperHalf);
 
             var iqr = upperQuartile - lowerQuartile;
 
@@ -68,11 +63,13 @@ namespace ListingLens.Statistics
             return new MarketStatistics
             {
                 ListingCount = prices.Count,
-                AveragePrice = prices.Average(),
+                AnalysedListingCount = analysedPrices.Count,
+                OutlierCount = outlierCount,
 
-                MedianPrice = median,
-                LowestPrice = prices.First(),
-                HighestPrice = prices.Last(),
+                AveragePrice = analysedPrices.Average(),
+                MedianPrice = CalculateMedian(analysedPrices),
+                LowestPrice = analysedPrices.First(),
+                HighestPrice = analysedPrices.Last(),
 
                 LowerQuartile = lowerQuartile,
                 UpperQuartile = upperQuartile,

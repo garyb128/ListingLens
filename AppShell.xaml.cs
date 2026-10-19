@@ -6,10 +6,10 @@ public partial class AppShell : Shell
     {
         InitializeComponent();
 
-        Routing.RegisterRoute(nameof(MainPage), typeof(MainPage));
-
         Items.Add(new ShellContent
         {
+            Title = "Home",
+            Route = "MainPage",
             Content = mainPage
         });
     }

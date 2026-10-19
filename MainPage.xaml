@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -7,46 +7,44 @@
     x:Name="MainPageRoot"
     Shell.NavBarIsVisible="False">
 
-    <Grid
-        Padding="16"
-        RowSpacing="8">
+    <Grid Padding="16" RowSpacing="8">
 
         <Grid.RowDefinitions>
 
-            <!-- Title -->
-            <RowDefinition Height="Auto"/>
+            <!--  Title  -->
+            <RowDefinition Height="Auto" />
 
-            <!-- Search -->
-            <RowDefinition Height="Auto"/>
+            <!--  Search  -->
+            <RowDefinition Height="Auto" />
 
-            <!-- Exclusions -->
-            <RowDefinition Height="Auto"/>
+            <!--  Exclusions  -->
+            <RowDefinition Height="Auto" />
 
-            <!-- Marketplace / location / delivery -->
-            <RowDefinition Height="Auto"/>
+            <!--  Marketplace / location / delivery  -->
+            <RowDefinition Height="Auto" />
 
-            <!-- Error -->
-            <RowDefinition Height="Auto"/>
+            <!--  Error  -->
+            <RowDefinition Height="Auto" />
 
-            <!-- Statistics -->
-            <RowDefinition Height="Auto"/>
+            <!--  Statistics  -->
+            <RowDefinition Height="Auto" />
 
-            <!-- Sort -->
-            <RowDefinition Height="Auto"/>
+            <!--  Sort  -->
+            <RowDefinition Height="Auto" />
 
-            <!-- Results -->
-            <RowDefinition Height="*"/>
+            <!--  Results  -->
+            <RowDefinition Height="*" />
 
         </Grid.RowDefinitions>
 
 
-        <!-- =========================================================
-             TITLE
-             ========================================================= -->
+        <!--
+            =========================================================
+            TITLE
+            =========================================================
+        -->
 
-        <VerticalStackLayout
-            Grid.Row="0"
-            Spacing="8">
+        <VerticalStackLayout Grid.Row="0" Spacing="8">
 
             <Grid ColumnDefinitions="*,Auto">
 
@@ -71,18 +69,14 @@
 
                 <VerticalStackLayout Spacing="6">
 
-                    <Label
-                        Text="eBay API keys"
-                        FontAttributes="Bold" />
+                    <Label Text="eBay API keys" FontAttributes="Bold" />
 
                     <Label
                         Text="ListingLens uses your own eBay developer keys (developer.ebay.com). They are stored on this device only."
                         FontSize="12"
                         Opacity="0.75" />
 
-                    <Entry
-                        Placeholder="Client ID (App ID)"
-                        Text="{Binding ClientIdInput}" />
+                    <Entry Placeholder="Client ID (App ID)" Text="{Binding ClientIdInput}" />
 
                     <Entry
                         Placeholder="Client Secret (Cert ID) - leave blank to keep the saved one"
@@ -101,9 +95,7 @@
 
                     <HorizontalStackLayout Spacing="8">
 
-                        <Button
-                            Text="Save"
-                            Command="{Binding SaveCredentialsCommand}" />
+                        <Button Text="Save" Command="{Binding SaveCredentialsCommand}" />
 
                         <Button
                             Text="Remove saved keys"
@@ -112,9 +104,7 @@
 
                     </HorizontalStackLayout>
 
-                    <Label
-                        Text="{Binding SettingsMessage}"
-                        FontSize="12" />
+                    <Label Text="{Binding SettingsMessage}" FontSize="12" />
 
                 </VerticalStackLayout>
 
@@ -123,18 +113,18 @@
         </VerticalStackLayout>
 
 
-        <!-- =========================================================
-             SEARCH
-             ========================================================= -->
+        <!--
+            =========================================================
+            SEARCH
+            =========================================================
+        -->
 
-        <Grid
-            Grid.Row="1"
-            ColumnSpacing="10">
+        <Grid Grid.Row="1" ColumnSpacing="10">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
 
@@ -155,14 +145,17 @@
             <Button
                 Grid.Column="2"
                 Text="Search"
-                Command="{Binding SearchCommand}" />
+                Command="{Binding SearchCommand}"
+                MinimumWidthRequest="100" />
 
         </Grid>
 
 
-        <!-- =========================================================
-             EXCLUSIONS
-             ========================================================= -->
+        <!--
+            =========================================================
+            EXCLUSIONS
+            =========================================================
+        -->
 
         <Entry
             Grid.Row="2"
@@ -170,83 +163,94 @@
             Text="{Binding ExcludeTerms}" />
 
 
-        <!-- =========================================================
-     FILTERS
-     ========================================================= -->
+        <!--
+            =========================================================
+            FILTERS
+            =========================================================
+        -->
 
         <Grid
-    Grid.Row="3"
-    ColumnSpacing="12"
-    RowSpacing="3">
+            Grid.Row="3"
+            ColumnSpacing="12"
+            RowSpacing="8">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="{OnIdiom Desktop='*', Phone='0'}" />
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
+            <VerticalStackLayout
+                Grid.Row="0"
+                Grid.Column="0"
+                Spacing="3">
 
-            <!-- LABELS -->
+                <Label
+                    Text="Marketplace"
+                    FontSize="11"
+                    Opacity="0.75" />
 
-            <Label
-        Grid.Row="0"
-        Grid.Column="0"
-        Text="Marketplace"
-        FontSize="11"
-        Opacity="0.75" />
+                <Picker
+                    ItemsSource="{Binding MarketPlaces}"
+                    SelectedItem="{Binding SelectedMarketplace}"
+                    ItemDisplayBinding="{Binding Name}"
+                    HorizontalOptions="Fill" />
 
-            <Label
-        Grid.Row="0"
-        Grid.Column="1"
-        Text="Item location"
-        FontSize="11"
-        Opacity="0.75" />
+            </VerticalStackLayout>
 
-            <Label
-        Grid.Row="0"
-        Grid.Column="2"
-        Text="Ships to"
-        FontSize="11"
-        Opacity="0.75" />
+            <VerticalStackLayout
+                Grid.Row="0"
+                Grid.Column="1"
+                Spacing="3">
 
+                <Label
+                    Text="Item location"
+                    FontSize="11"
+                    Opacity="0.75" />
 
-            <!-- PICKERS -->
+                <Picker
+                    ItemsSource="{Binding ItemLocationCountries}"
+                    SelectedItem="{Binding SelectedItemLocationCountry}"
+                    ItemDisplayBinding="{Binding Name}"
+                    HorizontalOptions="Fill" />
 
-            <Picker
-        Grid.Row="1"
-        Grid.Column="0"
-        ItemsSource="{Binding MarketPlaces}"
-        SelectedItem="{Binding SelectedMarketplace}"
-        ItemDisplayBinding="{Binding Name}"
-        HorizontalOptions="Fill" />
+            </VerticalStackLayout>
 
-            <Picker
-        Grid.Row="1"
-        Grid.Column="1"
-        ItemsSource="{Binding ItemLocationCountries}"
-        SelectedItem="{Binding SelectedItemLocationCountry}"
-        ItemDisplayBinding="{Binding Name}"
-        HorizontalOptions="Fill" />
+            <VerticalStackLayout
+                Grid.Row="{OnIdiom Desktop=0,
+                                   Phone=1}"
+                Grid.Column="{OnIdiom Desktop=2,
+                                      Phone=0}"
+                Grid.ColumnSpan="{OnIdiom Desktop=1,
+                                          Phone=2}"
+                Spacing="3">
 
-            <Picker
-        Grid.Row="1"
-        Grid.Column="2"
-        ItemsSource="{Binding DeliveryCountries}"
-        SelectedItem="{Binding SelectedDeliveryCountry}"
-        ItemDisplayBinding="{Binding Name}"
-        HorizontalOptions="Fill" />
+                <Label
+                    Text="Ships to"
+                    FontSize="11"
+                    Opacity="0.75" />
+
+                <Picker
+                    ItemsSource="{Binding DeliveryCountries}"
+                    SelectedItem="{Binding SelectedDeliveryCountry}"
+                    ItemDisplayBinding="{Binding Name}"
+                    HorizontalOptions="Fill" />
+
+            </VerticalStackLayout>
 
         </Grid>
 
 
-        <!-- =========================================================
-             ERROR MESSAGE
-             ========================================================= -->
+        <!--
+            =========================================================
+            ERROR MESSAGE
+            =========================================================
+        -->
 
         <Label
             Grid.Row="4"
@@ -255,9 +259,11 @@
             FontSize="13" />
 
 
-        <!-- =========================================================
-             MARKET SUMMARY
-             ========================================================= -->
+        <!--
+            =========================================================
+            MARKET SUMMARY
+            =========================================================
+        -->
 
         <Border
             Grid.Row="5"
@@ -265,16 +271,15 @@
             StrokeThickness="1"
             IsVisible="{Binding HasStatistics}">
 
-            <Grid
-                RowSpacing="8">
+            <Grid RowSpacing="8">
 
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
 
-                <!-- HEADER -->
+                <!--  HEADER  -->
                 <Label
                     Grid.Row="0"
                     Text="Market Summary"
@@ -282,184 +287,133 @@
                     FontAttributes="Bold" />
 
 
-                <!-- STATISTICS -->
+                <!--  STATISTICS  -->
                 <Grid
                     Grid.Row="1"
-                    ColumnSpacing="30">
+                    ColumnSpacing="16"
+                    RowSpacing="10">
 
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="{OnIdiom Desktop='*', Phone='0'}" />
                     </Grid.ColumnDefinitions>
 
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                    <!-- =====================
-                         LOW
-                         ===================== -->
-
-                    <Grid
+                    <VerticalStackLayout
+                        Grid.Row="0"
                         Grid.Column="0"
-                        RowSpacing="4"
-                        ColumnSpacing="10">
-
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
+                        Spacing="2">
 
                         <Label
-                            Grid.Row="0"
-                            Grid.Column="0"
                             Text="Lowest"
                             FontSize="11"
-                            Opacity="0.7"
-                            VerticalOptions="Center" />
+                            Opacity="0.7" />
 
                         <Label
-                            Grid.Row="0"
-                            Grid.Column="1"
                             Text="{Binding Statistics.LowestDisplay}"
                             FontSize="16"
-                            FontAttributes="Bold"
-                            VerticalOptions="Center" />
+                            FontAttributes="Bold" />
 
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Spacing="2">
 
                         <Label
-                            Grid.Row="1"
-                            Grid.Column="0"
                             Text="Typical Low"
                             FontSize="11"
-                            Opacity="0.7"
-                            VerticalOptions="Center" />
+                            Opacity="0.7" />
 
                         <Label
-                            Grid.Row="1"
-                            Grid.Column="1"
                             Text="{Binding Statistics.TypicalLowDisplay}"
                             FontSize="16"
-                            FontAttributes="Bold"
-                            VerticalOptions="Center" />
+                            FontAttributes="Bold" />
 
-                    </Grid>
+                    </VerticalStackLayout>
 
-
-                    <!-- =====================
-                         CENTRE
-                         ===================== -->
-
-                    <Grid
-                        Grid.Column="1"
-                        RowSpacing="4"
-                        ColumnSpacing="10">
-
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
+                    <VerticalStackLayout
+                        Grid.Row="{OnIdiom Desktop=0,
+                                           Phone=1}"
+                        Grid.Column="{OnIdiom Desktop=2,
+                                              Phone=0}"
+                        Spacing="2">
 
                         <Label
-                            Grid.Row="0"
-                            Grid.Column="0"
                             Text="Median"
                             FontSize="11"
-                            Opacity="0.7"
-                            VerticalOptions="Center" />
+                            Opacity="0.7" />
 
                         <Label
-                            Grid.Row="0"
-                            Grid.Column="1"
                             Text="{Binding Statistics.MedianDisplay}"
                             FontSize="16"
-                            FontAttributes="Bold"
-                            VerticalOptions="Center" />
+                            FontAttributes="Bold" />
 
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout
+                        Grid.Row="{OnIdiom Desktop=1,
+                                           Phone=1}"
+                        Grid.Column="{OnIdiom Desktop=0,
+                                              Phone=1}"
+                        Spacing="2">
 
                         <Label
-                            Grid.Row="1"
-                            Grid.Column="0"
                             Text="Average"
                             FontSize="11"
-                            Opacity="0.7"
-                            VerticalOptions="Center" />
+                            Opacity="0.7" />
 
                         <Label
-                            Grid.Row="1"
-                            Grid.Column="1"
                             Text="{Binding Statistics.AverageDisplay}"
                             FontSize="16"
-                            FontAttributes="Bold"
-                            VerticalOptions="Center" />
+                            FontAttributes="Bold" />
 
-                    </Grid>
+                    </VerticalStackLayout>
 
-
-                    <!-- =====================
-                         HIGH
-                         ===================== -->
-
-                    <Grid
-                        Grid.Column="2"
-                        RowSpacing="4"
-                        ColumnSpacing="10">
-
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
+                    <VerticalStackLayout
+                        Grid.Row="{OnIdiom Desktop=1,
+                                           Phone=2}"
+                        Grid.Column="{OnIdiom Desktop=1,
+                                              Phone=0}"
+                        Spacing="2">
 
                         <Label
-                            Grid.Row="0"
-                            Grid.Column="0"
                             Text="Typical High"
                             FontSize="11"
-                            Opacity="0.7"
-                            VerticalOptions="Center" />
+                            Opacity="0.7" />
 
                         <Label
-                            Grid.Row="0"
-                            Grid.Column="1"
                             Text="{Binding Statistics.TypicalHighDisplay}"
                             FontSize="16"
-                            FontAttributes="Bold"
-                            VerticalOptions="Center" />
+                            FontAttributes="Bold" />
 
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout
+                        Grid.Row="{OnIdiom Desktop=1,
+                                           Phone=2}"
+                        Grid.Column="{OnIdiom Desktop=2,
+                                              Phone=1}"
+                        Spacing="2">
 
                         <Label
-                            Grid.Row="1"
-                            Grid.Column="0"
                             Text="Highest"
                             FontSize="11"
-                            Opacity="0.7"
-                            VerticalOptions="Center" />
+                            Opacity="0.7" />
 
                         <Label
-                            Grid.Row="1"
-                            Grid.Column="1"
                             Text="{Binding Statistics.HighestDisplay}"
                             FontSize="16"
-                            FontAttributes="Bold"
-                            VerticalOptions="Center" />
+                            FontAttributes="Bold" />
 
-                    </Grid>
+                    </VerticalStackLayout>
 
                 </Grid>
 
@@ -468,9 +422,11 @@
         </Border>
 
 
-        <!-- =========================================================
-             SORT / RESULT COUNT
-             ========================================================= -->
+        <!--
+            =========================================================
+            SORT / RESULT COUNT
+            =========================================================
+        -->
 
         <Grid
             Grid.Row="6"
@@ -478,10 +434,9 @@
             ColumnSpacing="8">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
 
@@ -496,13 +451,13 @@
                 Grid.Column="1"
                 ItemsSource="{Binding SortOptions}"
                 SelectedItem="{Binding SelectedSortOption}"
-                WidthRequest="190" />
+                MaximumWidthRequest="260"
+                HorizontalOptions="Fill" />
 
 
             <Label
-                Grid.Column="3"
-                Text="{Binding Listings.Count,
-                               StringFormat='{}{0} listings shown'}"
+                Grid.Column="2"
+                Text="{Binding Listings.Count, StringFormat='{}{0} listings shown'}"
                 FontSize="12"
                 Opacity="0.65"
                 VerticalOptions="Center" />
@@ -510,9 +465,11 @@
         </Grid>
 
 
-        <!-- =========================================================
-             LISTINGS
-             ========================================================= -->
+        <!--
+            =========================================================
+            LISTINGS
+            =========================================================
+        -->
 
         <CollectionView
             Grid.Row="7"
@@ -529,36 +486,32 @@
                         StrokeThickness="1">
 
                         <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="7"/>
+                            <RoundRectangle CornerRadius="7" />
                         </Border.StrokeShape>
 
 
-                        <!-- CLICK TO OPEN EBAY -->
+                        <!--  CLICK TO OPEN EBAY  -->
                         <Border.GestureRecognizers>
 
-                            <TapGestureRecognizer
-                                Command="{Binding Source={x:Reference MainPageRoot},
-                                                  Path=BindingContext.OpenListingCommand}"
-                                CommandParameter="{Binding .}" />
+                            <TapGestureRecognizer Command="{Binding Source={x:Reference MainPageRoot}, Path=BindingContext.OpenListingCommand}" CommandParameter="{Binding .}" />
 
                         </Border.GestureRecognizers>
 
 
-                        <Grid
-                            RowSpacing="8">
+                        <Grid RowSpacing="8">
 
                             <Grid.RowDefinitions>
 
-                                <!-- Title -->
-                                <RowDefinition Height="Auto"/>
+                                <!--  Title  -->
+                                <RowDefinition Height="Auto" />
 
-                                <!-- Listing information -->
-                                <RowDefinition Height="Auto"/>
+                                <!--  Listing information  -->
+                                <RowDefinition Height="Auto" />
 
                             </Grid.RowDefinitions>
 
 
-                            <!-- TITLE -->
+                            <!--  TITLE  -->
                             <Label
                                 Grid.Row="0"
                                 Text="{Binding Title}"
@@ -568,68 +521,67 @@
                                 LineBreakMode="TailTruncation" />
 
 
-                            <!-- CONTENT -->
+                            <!--  CONTENT  -->
                             <Grid
                                 Grid.Row="1"
-                                ColumnSpacing="15">
+                                ColumnSpacing="12"
+                                RowSpacing="6">
 
                                 <Grid.ColumnDefinitions>
-
-                                    <!-- Image -->
-                                    <ColumnDefinition Width="100"/>
-
-                                    <!-- Details -->
-                                    <ColumnDefinition Width="*"/>
-
-                                    <!-- Total -->
-                                    <ColumnDefinition Width="150"/>
-
+                                    <ColumnDefinition Width="90" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="{OnIdiom Desktop='Auto', Phone='0'}" />
                                 </Grid.ColumnDefinitions>
 
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
-                                <!-- IMAGE -->
                                 <Image
+                                    Grid.Row="0"
                                     Grid.Column="0"
                                     Source="{Binding ImageUrl}"
-                                    HeightRequest="100"
-                                    WidthRequest="100"
-                                    Aspect="AspectFit" />
+                                    HeightRequest="90"
+                                    WidthRequest="90"
+                                    Aspect="AspectFit"
+                                    VerticalOptions="Start" />
 
-
-                                <!-- DETAILS -->
                                 <VerticalStackLayout
+                                    Grid.Row="0"
                                     Grid.Column="1"
-                                    Spacing="4"
-                                    VerticalOptions="Center">
+                                    Spacing="2">
 
-                                    <Label
-                                        Text="{Binding ItemPriceDisplay}"
-                                        FontSize="14" />
+                                    <Label Text="{Binding ItemPriceDisplay}" FontSize="14" />
 
-                                    <Label
-                                        Text="{Binding ShippingPriceDisplay}"
-                                        FontSize="14" />
+                                    <Label Text="{Binding ShippingPriceDisplay}" FontSize="14" />
 
                                     <Label
                                         Text="{Binding Condition}"
                                         FontSize="13"
                                         Opacity="0.85"
-                                        Margin="0,5,0,0" />
+                                        LineBreakMode="TailTruncation"
+                                        MaxLines="1" />
 
                                     <Label
                                         Text="{Binding BuyingOption}"
                                         FontSize="12"
-                                        Opacity="0.65" />
+                                        Opacity="0.65"
+                                        LineBreakMode="TailTruncation"
+                                        MaxLines="1" />
 
                                 </VerticalStackLayout>
 
-
-                                <!-- TOTAL -->
                                 <VerticalStackLayout
-                                    Grid.Column="2"
-                                    Spacing="3"
-                                    VerticalOptions="Center"
-                                    HorizontalOptions="End">
+                                    Grid.Row="{OnIdiom Desktop=0,
+                                                       Phone=1}"
+                                    Grid.Column="{OnIdiom Desktop=2,
+                                                          Phone=0}"
+                                    Grid.ColumnSpan="{OnIdiom Desktop=1,
+                                                              Phone=2}"
+                                    Spacing="0"
+                                    HorizontalOptions="End"
+                                    VerticalOptions="Center">
 
                                     <Label
                                         Text="Total"
@@ -639,7 +591,7 @@
 
                                     <Label
                                         Text="{Binding TotalPriceDisplay}"
-                                        FontSize="21"
+                                        FontSize="20"
                                         FontAttributes="Bold"
                                         HorizontalTextAlignment="End" />
 
@@ -652,7 +604,6 @@
                                 </VerticalStackLayout>
 
                             </Grid>
-
                         </Grid>
 
                     </Border>

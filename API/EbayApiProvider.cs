@@ -76,7 +76,7 @@ public class EbayApiProvider
         request.Headers.Accept.Add(
             new MediaTypeWithQualityHeaderValue(
                 "application/json"));
-        
+
         var response = await _httpClient.SendAsync(request);
 
         var json = await response.Content.ReadAsStringAsync();
@@ -86,7 +86,12 @@ public class EbayApiProvider
 
         System.Diagnostics.Debug.WriteLine(json);
 
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new EbayApiException(
+                (int)response.StatusCode,
+                $"eBay API error ({(int)response.StatusCode} {response.StatusCode}): {json}");
+        }
 
         var result = JsonSerializer.Deserialize<EbayBrowseResponse>(json);
 

@@ -16,6 +16,8 @@ public static class MauiProgram
             .UseMauiApp<App>()
             .ConfigureFonts(fonts =>
             {
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
         builder.Services.AddHttpClient();
@@ -28,11 +30,6 @@ public static class MauiProgram
         builder.Services.AddTransient<MainPage>();
 
         var assembly = typeof(MauiProgram).Assembly;
-
-        using var stream = assembly.GetManifestResourceStream("ListingLens.appsettings.json");
-
-        if (stream != null)
-            builder.Configuration.AddJsonStream(stream);
 
         builder.Configuration.AddUserSecrets(assembly);
         builder.Configuration.AddEnvironmentVariables();
