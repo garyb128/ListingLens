@@ -1,18 +1,21 @@
-﻿namespace ListingLens;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace ListingLens;
 
 public partial class App : Application
 {
-    private readonly AppShell _appShell;
+    private readonly IServiceProvider _services;
 
-    public App(AppShell appShell)
+    public App(IServiceProvider services)
     {
         InitializeComponent();
 
-        _appShell = appShell;
+        _services = services;
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        return new Window(_appShell);
+        // Resolve the shell after app resources have loaded.
+        return new Window(_services.GetRequiredService<AppShell>());
     }
 }

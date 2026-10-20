@@ -6,6 +6,7 @@ public partial class AppShell : Shell
     {
         InitializeComponent();
 
+        // Use the DI-created page so its SearchViewModel is injected.
         Items.Add(new ShellContent
         {
             Title = "Home",

@@ -1,7 +1,13 @@
-﻿namespace ListingLens.Models;
+﻿using System.ComponentModel;
 
-public class MarketplaceListing
+namespace ListingLens.Models;
+
+public class MarketplaceListing : INotifyPropertyChanged
 {
+    PriceBand _priceBand;
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     public string Title { get; set; } = string.Empty;
 
     public decimal Price { get; set; }
@@ -23,6 +29,22 @@ public class MarketplaceListing
     public string BuyingOption { get; set; } = string.Empty;
 
     public ListingClassification Classification { get; set; }
+
+    // Set after the market summary is calculated; drives the total-price colour.
+    public PriceBand PriceBand
+    {
+        get => _priceBand;
+        set
+        {
+            if (_priceBand == value)
+                return;
+
+            _priceBand = value;
+            PropertyChanged?.Invoke(
+                this,
+                new PropertyChangedEventArgs(nameof(PriceBand)));
+        }
+    }
 
     public bool IsComparable =>
         Classification == ListingClassification.Standard;

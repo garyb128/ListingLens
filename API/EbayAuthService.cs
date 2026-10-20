@@ -1,5 +1,6 @@
 using ListingLens.Models;
 using ListingLens.Services;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -36,30 +37,48 @@ public class EbayAuthService
         var encoded = Convert.ToBase64String(
             Encoding.UTF8.GetBytes($"{credentials.ClientId}:{credentials.ClientSecret}"));
 
-        using var request = new HttpRequestMessage(
-            HttpMethod.Post,
-            tokenUrl);
+        HttpRequestMessage CreateRequest()
+        {
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                tokenUrl);
 
-        request.Headers.Authorization = new AuthenticationHeaderValue("Basic", encoded);
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue("Basic", encoded);
 
-        request.Content = new FormUrlEncodedContent(
-            [
-                new KeyValuePair<string, string>(
-                    "grant_type",
-                    "client_credentials"),
+            request.Content = new FormUrlEncodedContent(
+                [
+                    new KeyValuePair<string, string>(
+                "grant_type",
+                "client_credentials"),
 
-                new KeyValuePair<string, string>(
-                    "scope",
-                    "https://api.ebay.com/oauth/api_scope")
-            ]);
+            new KeyValuePair<string, string>(
+                "scope",
+                "https://api.ebay.com/oauth/api_scope")
+                ]);
 
-        var response = await _httpClient.SendAsync(request);
+            return request;
+        }
+
+        using var response = await HttpRetry.SendAsync(
+            _httpClient,
+            CreateRequest);
 
         if (!response.IsSuccessStatusCode)
         {
+            if (response.StatusCode is
+                HttpStatusCode.BadRequest or
+                HttpStatusCode.Unauthorized or
+                HttpStatusCode.Forbidden)
+            {
+                throw new Exception(
+                    $"eBay rejected the API keys ({(int)response.StatusCode}). " +
+                    "Check the Client ID, Client Secret and that Environment (Sandbox/Production) matches your keyset.");
+            }
+
             throw new Exception(
-                $"eBay rejected the API keys ({(int)response.StatusCode}). " +
-                "Check the Client ID, Client Secret and that Environment (Sandbox/Production) matches your keyset.");
+                $"eBay could not issue an access token right now ({(int)response.StatusCode}). " +
+                "Please try again.");
         }
 
         var json = await response.Content.ReadAsStringAsync();

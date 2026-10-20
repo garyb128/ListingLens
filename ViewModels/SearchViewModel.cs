@@ -1,10 +1,9 @@
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ListingLens.API;
-using ListingLens.Statistics;
 using ListingLens.Models;
 using ListingLens.Services;
+using ListingLens.Statistics;
 using Microsoft.Maui.ApplicationModel;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -16,21 +15,33 @@ public partial class SearchViewModel : ObservableObject
     readonly EbayApiProvider _ebayApiProvider;
     readonly MarketplaceService _marketplaceService;
     readonly EbayCredentialStore _credentialStore;
+    readonly SearchCache _searchCache;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SearchCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RefreshCommand))]
     string searchTerm = string.Empty;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SearchCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RefreshCommand))]
     EbayMarketplace? selectedMarketplace;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SearchCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RefreshCommand))]
     bool isSearching;
 
     [ObservableProperty]
     string errorMessage = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasResultStatusMessage))]
+    string resultStatusMessage = string.Empty;
+
+    public bool HasResultStatusMessage =>
+        !string.IsNullOrWhiteSpace(ResultStatusMessage);
+
     [ObservableProperty]
     string excludeTerms = string.Empty;
 
@@ -39,9 +50,6 @@ public partial class SearchViewModel : ObservableObject
 
     [ObservableProperty]
     CountryOption? selectedDeliveryCountry;
-
-    [ObservableProperty]
-    string searchQualityMessage = string.Empty;
 
     [ObservableProperty]
     MarketStatistics? statistics;
@@ -95,8 +103,11 @@ public partial class SearchViewModel : ObservableObject
             new() { Name = "Australia", Code = "AU" }
     ];
 
-
     public ObservableCollection<MarketplaceListing> Listings { get; } = [];
+
+
+
+    // Snapshot in eBay order; Listings is the sorted collection displayed by the UI.
     List<MarketplaceListing> _originalListings = [];
     public ObservableCollection<string> SortOptions { get; } =
         [
@@ -112,11 +123,13 @@ public partial class SearchViewModel : ObservableObject
     public SearchViewModel(
         EbayApiProvider ebayApiProvider,
         MarketplaceService marketplaceService,
-        EbayCredentialStore credentialStore)
+        EbayCredentialStore credentialStore,
+        SearchCache searchCache)
     {
         _ebayApiProvider = ebayApiProvider;
         _marketplaceService = marketplaceService;
         _credentialStore = credentialStore;
+        _searchCache = searchCache;
 
         MarketPlaces = new ObservableCollection<EbayMarketplace>(_marketplaceService.GetMarketplaces());
 
@@ -176,14 +189,11 @@ public partial class SearchViewModel : ObservableObject
                 ClientSecretInput,
                 SelectedEnvironment);
 
+            _searchCache.Clear();
             ClientSecretInput = string.Empty;
             HasSavedCredentials = true;
             SettingsMessage = "Saved. Your keys are stored on this device only.";
             ErrorMessage = string.Empty;
-        }
-        catch (EbayApiException ex)
-        {
-            ErrorMessage = ex.Message;
         }
         catch (Exception ex)
         {
@@ -195,6 +205,7 @@ public partial class SearchViewModel : ObservableObject
     void ClearCredentials()
     {
         _credentialStore.Clear();
+        _searchCache.Clear();
 
         ClientIdInput = string.Empty;
         ClientSecretInput = string.Empty;
@@ -221,6 +232,7 @@ public partial class SearchViewModel : ObservableObject
         }
     }
 
+    // Keeps the Search and Refresh commands disabled while invalid or already running.
     bool CanSearch()
     {
         return !IsSearching
@@ -231,25 +243,62 @@ public partial class SearchViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanSearch))]
     async Task Search()
     {
+        await SearchCore(forceRefresh: false);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanSearch))]
+    async Task Refresh()
+    {
+        await SearchCore(forceRefresh: true);
+    }
+
+    async Task SearchCore(bool forceRefresh)
+    {
         if (string.IsNullOrWhiteSpace(SearchTerm) ||
             SelectedMarketplace == null)
             return;
 
         IsSearching = true;
         ErrorMessage = string.Empty;
-        SearchQualityMessage = string.Empty;
+        ResultStatusMessage = string.Empty;
         HasStatistics = false;
         Statistics = null;
 
         try
         {
-            var result = await _ebayApiProvider.SearchListingsAsync(
-                SearchTerm,
+            var cacheKey = SearchCacheKey.Create(
                 SelectedMarketplace.MarketplaceId,
+                SearchTerm,
                 SelectedItemLocationCountry?.Code,
                 SelectedDeliveryCountry?.Code);
 
-            System.Diagnostics.Debug.WriteLine($"eBay returned {result.ItemSummaries.Count} listings.");
+            var cached = forceRefresh ? null : _searchCache.Get(cacheKey);
+
+            EbayBrowseResponse result;
+
+            if (cached is not null)
+            {
+                result = cached.Response;
+
+                // CachedAt is UTC; show the user's local time.
+                ResultStatusMessage =
+                    $"Showing cached results from {cached.CachedAt.ToLocalTime():t}. " +
+                    "Use Refresh for live data.";
+
+                System.Diagnostics.Debug.WriteLine("Using cached eBay search results.");
+            }
+            else
+            {
+                result = await _ebayApiProvider.SearchListingsAsync(
+                    SearchTerm,
+                    SelectedMarketplace.MarketplaceId,
+                    SelectedItemLocationCountry?.Code,
+                    SelectedDeliveryCountry?.Code);
+
+                _searchCache.Set(cacheKey, result);
+
+                System.Diagnostics.Debug.WriteLine($"eBay returned {result.ItemSummaries.Count} listings.");
+            }
 
             Listings.Clear();
 
@@ -268,10 +317,12 @@ public partial class SearchViewModel : ObservableObject
                 if (shouldExclude)
                     continue;
 
+                // eBay's JSON numbers use invariant formatting ("12.34"), not the device culture.
                 decimal.TryParse(item.Price?.Value, CultureInfo.InvariantCulture, out var price);
 
                 decimal? shippingPrice = null;
 
+                // Some listings return several services; keep the cheapest valid cost.
                 if (item.ShippingOptions.ValueKind == System.Text.Json.JsonValueKind.Array)
                 {
                     foreach (var shippingOption in item.ShippingOptions.EnumerateArray())
@@ -322,19 +373,8 @@ public partial class SearchViewModel : ObservableObject
             Statistics = StatisticsCalculator.Calculate(Listings);
             HasStatistics = Statistics.ListingCount > 0;
 
+            ApplyPriceBands();
             ApplySort();
-
-            var comparableCount = Listings.Count(x => x.IsComparable);
-
-            var comparableRatio = Listings.Count > 0
-                ? (decimal)comparableCount / Listings.Count
-                : 0m;
-
-            var relativePriceSpread = Statistics.MedianPrice > 0
-                ? (Statistics.UpperQuartile - Statistics.LowerQuartile)
-                    / Statistics.MedianPrice
-                : 0m;
-
 
             if (Listings.Count == 0)
             {
@@ -373,6 +413,31 @@ public partial class SearchViewModel : ObservableObject
         ApplySort();
     }
 
+    void ApplyPriceBands()
+    {
+        var statistics = Statistics;
+
+        if (statistics is null || statistics.ListingCount == 0)
+            return;
+
+        foreach (var listing in Listings)
+        {
+            if (!listing.IsComparable || listing.Price <= 0)
+            {
+                listing.PriceBand = PriceBand.Unknown;
+                continue;
+            }
+
+            listing.PriceBand = listing.Price switch
+            {
+                var price when price <= statistics.LowerQuartile => PriceBand.Low,
+                var price when price >= statistics.UpperQuartile => PriceBand.High,
+                _ => PriceBand.Typical
+            };
+        }
+    }
+
+    // Rebuild the displayed list from the eBay-order snapshot.
     void ApplySort()
     {
         if (_originalListings.Count == 0)

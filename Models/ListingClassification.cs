@@ -1,4 +1,4 @@
-﻿using ListingLens.Models;
+﻿namespace ListingLens.Models;
 
 public enum ListingClassification
 {

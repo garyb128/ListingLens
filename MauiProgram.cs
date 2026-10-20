@@ -1,11 +1,10 @@
 using ListingLens;
 using ListingLens.API;
-using ListingLens.Interfaces;
 using ListingLens.Services;
 using ListingLens.ViewModels;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 public static class MauiProgram
 {
@@ -22,15 +21,23 @@ public static class MauiProgram
 
         builder.Services.AddHttpClient();
         builder.Services.AddSingleton<EbayCredentialStore>();
-        builder.Services.AddHttpClient<EbayAuthService>();
-        builder.Services.AddHttpClient<EbayApiProvider>();
+        builder.Services.AddHttpClient<EbayAuthService>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(15);
+        });
+        builder.Services.AddHttpClient<EbayApiProvider>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(15);
+        });
         builder.Services.AddSingleton<MarketplaceService>();
+        builder.Services.AddSingleton<SearchCache>();
         builder.Services.AddTransient<SearchViewModel>();
         builder.Services.AddTransient<AppShell>();
         builder.Services.AddTransient<MainPage>();
 
         var assembly = typeof(MauiProgram).Assembly;
 
+        // In-app SecureStorage is the primary key source; these are development fallbacks.
         builder.Configuration.AddUserSecrets(assembly);
         builder.Configuration.AddEnvironmentVariables();
 

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -46,19 +46,25 @@
 
         <VerticalStackLayout Grid.Row="0" Spacing="8">
 
-            <Grid ColumnDefinitions="*,Auto">
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
 
                 <Label
+                    Grid.Column="0"
                     Text="ListingLens"
-                    FontSize="22"
-                    FontAttributes="Bold"
-                    VerticalOptions="Center"
-                    Margin="0,0,0,2" />
+                    Style="{StaticResource PageTitle}"
+                    VerticalOptions="Center" />
 
                 <Button
                     Grid.Column="1"
-                    Text="API keys"
+                    Text="Settings"
+                    Style="{StaticResource SecondaryButton}"
                     Command="{Binding ToggleSettingsCommand}" />
+
+                <Button
+                    Grid.Column="2"
+                    Text="Refresh"
+                    Style="{StaticResource SecondaryButton}"
+                    Command="{Binding RefreshCommand}" />
 
             </Grid>
 
@@ -69,7 +75,7 @@
 
                 <VerticalStackLayout Spacing="6">
 
-                    <Label Text="eBay API keys" FontAttributes="Bold" />
+                    <Label Text="eBay API keys" Style="{StaticResource SectionTitle}" />
 
                     <Label
                         Text="ListingLens uses your own eBay developer keys (developer.ebay.com). They are stored on this device only."
@@ -99,6 +105,7 @@
 
                         <Button
                             Text="Remove saved keys"
+                            Style="{StaticResource SecondaryButton}"
                             Command="{Binding ClearCredentialsCommand}"
                             IsVisible="{Binding HasSavedCredentials}" />
 
@@ -169,31 +176,18 @@
             =========================================================
         -->
 
-        <Grid
+        <FlexLayout
             Grid.Row="3"
-            ColumnSpacing="12"
-            RowSpacing="8">
-
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="{OnIdiom Desktop='*', Phone='0'}" />
-            </Grid.ColumnDefinitions>
-
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+            Wrap="Wrap"
+            AlignItems="Start">
 
             <VerticalStackLayout
-                Grid.Row="0"
-                Grid.Column="0"
+                FlexLayout.Basis="150"
+                FlexLayout.Grow="1"
+                Margin="0,0,12,8"
                 Spacing="3">
 
-                <Label
-                    Text="Marketplace"
-                    FontSize="11"
-                    Opacity="0.75" />
+                <Label Text="Marketplace" Style="{StaticResource StatLabel}" />
 
                 <Picker
                     ItemsSource="{Binding MarketPlaces}"
@@ -204,14 +198,12 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout
-                Grid.Row="0"
-                Grid.Column="1"
+                FlexLayout.Basis="150"
+                FlexLayout.Grow="1"
+                Margin="0,0,12,8"
                 Spacing="3">
 
-                <Label
-                    Text="Item location"
-                    FontSize="11"
-                    Opacity="0.75" />
+                <Label Text="Item location" Style="{StaticResource StatLabel}" />
 
                 <Picker
                     ItemsSource="{Binding ItemLocationCountries}"
@@ -222,18 +214,12 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout
-                Grid.Row="{OnIdiom Desktop=0,
-                                   Phone=1}"
-                Grid.Column="{OnIdiom Desktop=2,
-                                      Phone=0}"
-                Grid.ColumnSpan="{OnIdiom Desktop=1,
-                                          Phone=2}"
+                FlexLayout.Basis="150"
+                FlexLayout.Grow="1"
+                Margin="0,0,12,8"
                 Spacing="3">
 
-                <Label
-                    Text="Ships to"
-                    FontSize="11"
-                    Opacity="0.75" />
+                <Label Text="Ships to" Style="{StaticResource StatLabel}" />
 
                 <Picker
                     ItemsSource="{Binding DeliveryCountries}"
@@ -243,7 +229,7 @@
 
             </VerticalStackLayout>
 
-        </Grid>
+        </FlexLayout>
 
 
         <!--
@@ -252,11 +238,20 @@
             =========================================================
         -->
 
-        <Label
-            Grid.Row="4"
-            Text="{Binding ErrorMessage}"
-            TextColor="Red"
-            FontSize="13" />
+        <VerticalStackLayout Grid.Row="4" Spacing="2">
+
+            <Label
+                Text="{Binding ErrorMessage}"
+                TextColor="Red"
+                FontSize="13" />
+
+            <Label
+                Text="{Binding ResultStatusMessage}"
+                FontSize="11"
+                Opacity="0.65"
+                IsVisible="{Binding HasResultStatusMessage}" />
+
+        </VerticalStackLayout>
 
 
         <!--
@@ -283,139 +278,88 @@
                 <Label
                     Grid.Row="0"
                     Text="Market Summary"
-                    FontSize="17"
-                    FontAttributes="Bold" />
+                    Style="{StaticResource SectionTitle}" />
 
 
                 <!--  STATISTICS  -->
-                <Grid
+                <FlexLayout
                     Grid.Row="1"
-                    ColumnSpacing="16"
-                    RowSpacing="10">
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="{OnIdiom Desktop='*', Phone='0'}" />
-                    </Grid.ColumnDefinitions>
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                    Wrap="Wrap"
+                    AlignItems="Start">
 
                     <VerticalStackLayout
-                        Grid.Row="0"
-                        Grid.Column="0"
+                        FlexLayout.Basis="140"
+                        FlexLayout.Grow="1"
+                        Margin="0,0,12,10"
                         Spacing="2">
 
-                        <Label
-                            Text="Lowest"
-                            FontSize="11"
-                            Opacity="0.7" />
+                        <Label Text="Lowest" Style="{StaticResource StatLabel}" />
 
-                        <Label
-                            Text="{Binding Statistics.LowestDisplay}"
-                            FontSize="16"
-                            FontAttributes="Bold" />
+                        <Label Text="{Binding Statistics.LowestDisplay}" Style="{StaticResource PriceLowValue}" />
 
                     </VerticalStackLayout>
 
                     <VerticalStackLayout
-                        Grid.Row="0"
-                        Grid.Column="1"
+                        FlexLayout.Basis="140"
+                        FlexLayout.Grow="1"
+                        Margin="0,0,12,10"
                         Spacing="2">
 
-                        <Label
-                            Text="Typical Low"
-                            FontSize="11"
-                            Opacity="0.7" />
+                        <Label Text="Typical Low" Style="{StaticResource StatLabel}" />
 
-                        <Label
-                            Text="{Binding Statistics.TypicalLowDisplay}"
-                            FontSize="16"
-                            FontAttributes="Bold" />
+                        <Label Text="{Binding Statistics.TypicalLowDisplay}" Style="{StaticResource PriceLowValue}" />
 
                     </VerticalStackLayout>
 
                     <VerticalStackLayout
-                        Grid.Row="{OnIdiom Desktop=0,
-                                           Phone=1}"
-                        Grid.Column="{OnIdiom Desktop=2,
-                                              Phone=0}"
+                        FlexLayout.Basis="140"
+                        FlexLayout.Grow="1"
+                        Margin="0,0,12,10"
                         Spacing="2">
 
-                        <Label
-                            Text="Median"
-                            FontSize="11"
-                            Opacity="0.7" />
+                        <Label Text="Median" Style="{StaticResource StatLabel}" />
 
-                        <Label
-                            Text="{Binding Statistics.MedianDisplay}"
-                            FontSize="16"
-                            FontAttributes="Bold" />
+                        <Label Text="{Binding Statistics.MedianDisplay}" Style="{StaticResource PriceTypicalValue}" />
 
                     </VerticalStackLayout>
 
                     <VerticalStackLayout
-                        Grid.Row="{OnIdiom Desktop=1,
-                                           Phone=1}"
-                        Grid.Column="{OnIdiom Desktop=0,
-                                              Phone=1}"
+                        FlexLayout.Basis="140"
+                        FlexLayout.Grow="1"
+                        Margin="0,0,12,10"
                         Spacing="2">
 
-                        <Label
-                            Text="Average"
-                            FontSize="11"
-                            Opacity="0.7" />
+                        <Label Text="Average" Style="{StaticResource StatLabel}" />
 
-                        <Label
-                            Text="{Binding Statistics.AverageDisplay}"
-                            FontSize="16"
-                            FontAttributes="Bold" />
+                        <Label Text="{Binding Statistics.AverageDisplay}" Style="{StaticResource PriceTypicalValue}" />
 
                     </VerticalStackLayout>
 
                     <VerticalStackLayout
-                        Grid.Row="{OnIdiom Desktop=1,
-                                           Phone=2}"
-                        Grid.Column="{OnIdiom Desktop=1,
-                                              Phone=0}"
+                        FlexLayout.Basis="140"
+                        FlexLayout.Grow="1"
+                        Margin="0,0,12,10"
                         Spacing="2">
 
-                        <Label
-                            Text="Typical High"
-                            FontSize="11"
-                            Opacity="0.7" />
+                        <Label Text="Typical High" Style="{StaticResource StatLabel}" />
 
-                        <Label
-                            Text="{Binding Statistics.TypicalHighDisplay}"
-                            FontSize="16"
-                            FontAttributes="Bold" />
+                        <Label Text="{Binding Statistics.TypicalHighDisplay}" Style="{StaticResource PriceHighValue}" />
 
                     </VerticalStackLayout>
 
                     <VerticalStackLayout
-                        Grid.Row="{OnIdiom Desktop=1,
-                                           Phone=2}"
-                        Grid.Column="{OnIdiom Desktop=2,
-                                              Phone=1}"
+                        FlexLayout.Basis="140"
+                        FlexLayout.Grow="1"
+                        Margin="0,0,12,10"
                         Spacing="2">
 
-                        <Label
-                            Text="Highest"
-                            FontSize="11"
-                            Opacity="0.7" />
+                        <Label Text="Highest" Style="{StaticResource StatLabel}" />
 
-                        <Label
-                            Text="{Binding Statistics.HighestDisplay}"
-                            FontSize="16"
-                            FontAttributes="Bold" />
+                        <Label Text="{Binding Statistics.HighestDisplay}" Style="{StaticResource PriceHighValue}" />
 
                     </VerticalStackLayout>
 
-                </Grid>
+                </FlexLayout>
 
             </Grid>
 
@@ -476,18 +420,34 @@
             ItemsSource="{Binding Listings}"
             SelectionMode="None">
 
+            <CollectionView.EmptyView>
+                <VerticalStackLayout
+                    Padding="32"
+                    Spacing="8"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center">
+
+                    <Label
+                        Text="No listings yet"
+                        Style="{StaticResource SectionTitle}"
+                        HorizontalTextAlignment="Center" />
+
+                    <Label
+                        Text="Search for an item to see what similar listings are asking."
+                        Style="{StaticResource PageSubtitle}"
+                        HorizontalTextAlignment="Center" />
+
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
             <CollectionView.ItemTemplate>
 
                 <DataTemplate>
 
                     <Border
-                        Padding="12"
-                        Margin="0,0,0,8"
+                        Padding="14"
+                        Margin="0,0,0,10"
                         StrokeThickness="1">
-
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="7" />
-                        </Border.StrokeShape>
 
 
                         <!--  CLICK TO OPEN EBAY  -->
@@ -515,8 +475,7 @@
                             <Label
                                 Grid.Row="0"
                                 Text="{Binding Title}"
-                                FontSize="17"
-                                FontAttributes="Bold"
+                                Style="{StaticResource CardTitle}"
                                 MaxLines="2"
                                 LineBreakMode="TailTruncation" />
 
@@ -530,7 +489,6 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="90" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="{OnIdiom Desktop='Auto', Phone='0'}" />
                                 </Grid.ColumnDefinitions>
 
                                 <Grid.RowDefinitions>
@@ -573,12 +531,9 @@
                                 </VerticalStackLayout>
 
                                 <VerticalStackLayout
-                                    Grid.Row="{OnIdiom Desktop=0,
-                                                       Phone=1}"
-                                    Grid.Column="{OnIdiom Desktop=2,
-                                                          Phone=0}"
-                                    Grid.ColumnSpan="{OnIdiom Desktop=1,
-                                                              Phone=2}"
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="2"
                                     Spacing="0"
                                     HorizontalOptions="End"
                                     VerticalOptions="Center">
@@ -591,8 +546,7 @@
 
                                     <Label
                                         Text="{Binding TotalPriceDisplay}"
-                                        FontSize="20"
-                                        FontAttributes="Bold"
+                                        Style="{StaticResource PriceTotal}"
                                         HorizontalTextAlignment="End" />
 
                                     <Label

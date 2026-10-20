@@ -60,24 +60,29 @@ public class EbayApiProvider
                 string.Join(",", filters))}";
         }
 
-        using var request = new HttpRequestMessage(
-            HttpMethod.Get,
-            url);
+        HttpRequestMessage CreateRequest()
+        {
+            var request = new HttpRequestMessage(
+                HttpMethod.Get,
+                url);
 
-        request.Headers.Authorization =
-            new AuthenticationHeaderValue(
-                "Bearer",
-                accessToken);
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue(
+                    "Bearer",
+                    accessToken);
 
-        request.Headers.Add(
-            "X-EBAY-C-MARKETPLACE-ID",
-            marketplaceId);
+            request.Headers.Add(
+                "X-EBAY-C-MARKETPLACE-ID",
+                marketplaceId);
 
-        request.Headers.Accept.Add(
-            new MediaTypeWithQualityHeaderValue(
-                "application/json"));
+            request.Headers.Accept.Add(
+                new MediaTypeWithQualityHeaderValue(
+                    "application/json"));
 
-        var response = await _httpClient.SendAsync(request);
+            return request;
+        }
+
+        using var response = await HttpRetry.SendAsync(_httpClient, CreateRequest);
 
         var json = await response.Content.ReadAsStringAsync();
 
@@ -86,6 +91,7 @@ public class EbayApiProvider
 
         System.Diagnostics.Debug.WriteLine(json);
 
+        // Keep the response body; EnsureSuccessStatusCode() would discard eBay's error details.
         if (!response.IsSuccessStatusCode)
         {
             throw new EbayApiException(
@@ -102,6 +108,4 @@ public class EbayApiProvider
 
         return result;
     }
-
-
 }

@@ -26,8 +26,6 @@ public class EbayItemSummary
     [JsonPropertyName("itemWebUrl")]
     public string ItemWebUrl { get; set; } = string.Empty;
 
-    public string ItemCountry { get; set; } = string.Empty;
-
     [JsonPropertyName("buyingOptions")]
     public List<string> BuyingOptions { get; set; } = [];
 }

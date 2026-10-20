@@ -45,12 +45,13 @@ public static class ListingClassifier
     ];
 
     public static ListingClassification Classify(
-           string title,
-           string searchTerm)
+        string title,
+        string searchTerm)
     {
         var normalizedTitle = Normalize(title);
         var normalizedSearch = Normalize(searchTerm);
 
+        // Most specific classification first; do not exclude a term the user explicitly searched for.
         if (ContainsAny(normalizedTitle, ReproductionTerms) &&
             !ContainsAny(normalizedSearch, ReproductionTerms))
         {
@@ -86,6 +87,7 @@ public static class ListingClassifier
             ContainsPhrase(text, Normalize(term)));
     }
 
+    // Match whole words only, so "box" does not match "boxed".
     static bool ContainsPhrase(
         string text,
         string phrase)
@@ -95,6 +97,7 @@ public static class ListingClassifier
             StringComparison.Ordinal);
     }
 
+    // Normalize punctuation and case before word matching.
     static string Normalize(string value)
     {
         var characters = value
@@ -106,27 +109,5 @@ public static class ListingClassifier
             ' ',
             new string(characters)
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries));
-    }
-
-    public static double CalculateQueryMatch(
-    string title,
-    string searchTerm)
-    {
-        var normalizedTitle = Normalize(title);
-
-        var searchWords = Normalize(searchTerm)
-            .Split(
-                ' ',
-                StringSplitOptions.RemoveEmptyEntries)
-            .Distinct()
-            .ToList();
-
-        if (searchWords.Count == 0)
-            return 0;
-
-        var matchedWords = searchWords.Count(word =>
-            ContainsPhrase(normalizedTitle, word));
-
-        return (double)matchedWords / searchWords.Count;
     }
 }
